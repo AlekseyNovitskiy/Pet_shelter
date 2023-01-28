@@ -3,10 +3,7 @@ package com.example.pet_shelter.listener;
 import com.example.pet_shelter.configuration.MenuDescription;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
-import com.pengrad.telegrambot.model.CallbackQuery;
-import com.pengrad.telegrambot.model.Message;
-import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.User;
+import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
@@ -16,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.awt.*;
 import java.util.List;
 
 @Service
@@ -43,6 +39,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     if (update.callbackQuery() != null) {
                         Long chatId = update.callbackQuery().message().chat().id();
                         callBackUpd(chatId, update);
+                        callBackUpdThirdMenu(chatId, update);
                     }
                 });
         logger.info("Processing update: {}", updates);
@@ -67,6 +64,18 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         }
     }
 
+    private void callBackUpdThirdMenu(Long chatId, Update update) {
+        CallbackQuery callbackQuery = update.callbackQuery();
+        if (update.callbackQuery() != null) {
+            String data = callbackQuery.data();
+            if (data.equals("2")) {
+                inlineButtonsListOfRules(chatId);
+            } else if (data.equals("3")) {
+                buttonCynologist(chatId);
+            }
+        }
+    }
+
     private void processUpdate(Long chatId, Update update) {
         String userMessage = update.message().text();
         switch (userMessage) {
@@ -78,15 +87,80 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 InlineKeyboardButton button2 = new InlineKeyboardButton("Как взять собаку из приюта").callbackData(MenuDescription.Option2.name());
                 InlineKeyboardButton button3 = new InlineKeyboardButton("Прислать отчет о питомце").callbackData(MenuDescription.Option3.name());
                 InlineKeyboardButton button4 = new InlineKeyboardButton("Позвать волонтера").callbackData(MenuDescription.Option4.name());
-                InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(
+                InlineKeyboardMarkup inlineKeyboardMenu1 = new InlineKeyboardMarkup(
                         new InlineKeyboardButton[]{button1},
                         new InlineKeyboardButton[]{button2},
                         new InlineKeyboardButton[]{button3},
                         new InlineKeyboardButton[]{button4});
 
-                SendMessage sendMessage = new SendMessage(chatId, "Please select an option:").replyMarkup(inlineKeyboard);
+                SendMessage sendMessage = new SendMessage(chatId, "Please select an option:").replyMarkup(inlineKeyboardMenu1);
                 telegramBot.execute(sendMessage);
+                break;
+            case "/menu2":
+                greetings(chatId,update);
+                InlineKeyboardButton one = new InlineKeyboardButton("рассказать о приюте").callbackData("12");
+                InlineKeyboardButton two = new InlineKeyboardButton("расписание работы приюта и адрес, схему проезда").callbackData("13");
+                InlineKeyboardButton three = new InlineKeyboardButton("техника безопасности на территории приюта").callbackData("14");
+                InlineKeyboardButton four = new InlineKeyboardButton("записать контактные данные для связи").callbackData("15");
+                InlineKeyboardButton five = new InlineKeyboardButton("позвать волонтера").callbackData("15");
+                InlineKeyboardMarkup keyboardMenu2 = new InlineKeyboardMarkup(
+                        new InlineKeyboardButton[]{one},
+                        new InlineKeyboardButton[]{two},
+                        new InlineKeyboardButton[]{three},
+                        new InlineKeyboardButton[]{four},
+                        new InlineKeyboardButton[]{five});
+                SendMessage sendMsg = new SendMessage(chatId, "Please select an option:").replyMarkup(keyboardMenu2);
+                telegramBot.execute(sendMsg);
+            case "/menu3":
+                greetings(chatId,update);
+                InlineKeyboardButton first = new InlineKeyboardButton("правила знакомства с собакой").callbackData("1");
+                InlineKeyboardButton second = new InlineKeyboardButton("список документов").callbackData("2");
+                InlineKeyboardButton third = new InlineKeyboardButton("советы кинолога").callbackData("3");
+                InlineKeyboardButton fourth = new InlineKeyboardButton("принять и записать контактные данные").callbackData("4");
+                InlineKeyboardButton fifth = new InlineKeyboardButton("позвать волонтера").callbackData("5");
+                InlineKeyboardMarkup keyboard3 = new InlineKeyboardMarkup(
+                        new InlineKeyboardButton[]{first},
+                        new InlineKeyboardButton[]{second},
+                        new InlineKeyboardButton[]{third},
+                        new InlineKeyboardButton[]{fourth},
+                        new InlineKeyboardButton[]{fifth});
+                SendMessage msg = new SendMessage(chatId, "Please select an option:").replyMarkup(keyboard3);
+                telegramBot.execute(msg);
                 break;
         }
     }
+
+    public void inlineButtonsListOfRules(Long chatId) {
+        InlineKeyboardButton first = new InlineKeyboardButton("документы, чтобы взять собаку").callbackData("6");
+        InlineKeyboardButton second = new InlineKeyboardButton("Транспортировка животного").callbackData("7");
+        InlineKeyboardButton third = new InlineKeyboardButton("Обустройство дома для щенка").callbackData("8");
+        InlineKeyboardButton fourth = new InlineKeyboardButton("Обустройство дома для взрослой собаки").callbackData("9");
+        InlineKeyboardButton fifth = new InlineKeyboardButton("Для собаки с ограниченными возможностями").callbackData("10");
+        InlineKeyboardButton six = new InlineKeyboardButton("причины отказа ").callbackData("11");
+        InlineKeyboardMarkup recomendationKeyboard = new InlineKeyboardMarkup(
+                new InlineKeyboardButton[]{first},
+                new InlineKeyboardButton[]{second},
+                new InlineKeyboardButton[]{third},
+                new InlineKeyboardButton[]{fourth},
+                new InlineKeyboardButton[]{fifth},
+                new InlineKeyboardButton[]{six});
+        SendMessage msg = new SendMessage(chatId, "Please select an option:").replyMarkup(recomendationKeyboard);
+        telegramBot.execute(msg);
+    }
+
+    public void buttonCynologist(Long chatId) {
+        InlineKeyboardButton first = new InlineKeyboardButton("Советуем этих кинологов").callbackData("buttonCynologist");
+        InlineKeyboardMarkup cynologistKeyboard = new InlineKeyboardMarkup(
+                first);
+        SendMessage msg = new SendMessage(chatId, "Please select an option:").replyMarkup(cynologistKeyboard);
+        telegramBot.execute(msg);
+    }
+
+    public void greetings(Long chatId,Update update) {
+        String firstName = update.message().chat().firstName();
+        String lastName = update.message().chat().lastName();
+        telegramBot.execute(new SendMessage(chatId, "Привет " + firstName + " " + lastName));
+    }
+
+
 }
