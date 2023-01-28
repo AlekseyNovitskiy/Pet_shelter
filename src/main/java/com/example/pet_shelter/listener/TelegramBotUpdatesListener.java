@@ -48,6 +48,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                         Long chatId = update.callbackQuery().message().chat().id();
                         callBackUpd(chatId, update);
                         callBackUpdThirdMenu(chatId, update);
+                        callBackUpdSecondMenu(chatId,update);
                     }
                 });
         logger.info("Processing update: {}", updates);
@@ -69,6 +70,15 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 telegramBot.execute(new SendMessage(chatId, MenuDescription.Option4.getValue()));
             }
 
+        }
+    }
+    private void callBackUpdSecondMenu(Long chatId, Update update) {
+        CallbackQuery callbackQuery = update.callbackQuery();
+        if (update.callbackQuery() != null) {
+            String data = callbackQuery.data();
+            if (data.equals("12")) {
+                AboutTheNursery(chatId);
+            }
         }
     }
 
@@ -119,6 +129,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                         new InlineKeyboardButton[]{five});
                 SendMessage sendMsg = new SendMessage(chatId, "Please select an option:").replyMarkup(keyboardMenu2);
                 telegramBot.execute(sendMsg);
+                break;
             case "/menu3":
                 greetings(chatId,update);
                 InlineKeyboardButton first = new InlineKeyboardButton("правила знакомства с собакой").callbackData("1");
