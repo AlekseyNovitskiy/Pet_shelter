@@ -24,8 +24,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
     @Value("${nameFileAboutTheNursery}")
-    String NAME_FILE_ABOUT_THE_NURSERY; // Место расположения файла информации о питомнике
-    int NUMBER_SIMVOLOV_READ_FILE_ABOUT_THE_NURSERY = 2048; // Максимально количество символов считываемое из файла *Информация о приюте*
+    String NAME_FILE_ABOUT_THE_NURSERY; // Место расположения файла информации о приюте
+    int NUMBER_CHARACTERS_READ_FILE_ABOUT_THE_NURSERY = 2048; // Максимально количество символов считываемое из файла *Информация о приюте*
 
     @Autowired
     private TelegramBot telegramBot;
@@ -74,7 +74,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     // Информация о питомнике *считывание информации о питомнике и вывод в чат Bot
     private void AboutTheNursery(long chatId) {
-        char[] buf = new char[NUMBER_SIMVOLOV_READ_FILE_ABOUT_THE_NURSERY];
+        char[] buf = new char[NUMBER_CHARACTERS_READ_FILE_ABOUT_THE_NURSERY];
         try (FileReader reader = new FileReader(NAME_FILE_ABOUT_THE_NURSERY)) {
             reader.read(buf);
         } catch (IOException ex) {
