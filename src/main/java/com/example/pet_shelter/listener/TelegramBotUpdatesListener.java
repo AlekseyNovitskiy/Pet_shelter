@@ -1,12 +1,8 @@
 package com.example.pet_shelter.listener;
 
-import com.example.pet_shelter.configuration.MenuDescription;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
-import com.pengrad.telegrambot.model.CallbackQuery;
-import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
@@ -16,13 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.awt.*;
 import java.util.List;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
+
+    @Value("${nameFileAboutTheNursery}")
+    String NAME_FILE_ABOUT_THE_NURSERY; // Место расположения файла информации о питомнике
+    int NUMBER_SIMVOLOV_READ_FILE_ABOUT_THE_NURSERY = 2048; // Максимально количество символов считываемое из файла *Информация о приюте*
 
     @Autowired
     private TelegramBot telegramBot;
@@ -35,58 +34,44 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     @Override
     public int process(List<Update> updates) {
         updates.stream()
-                .forEach(update -> {
-                    if (update.message() != null && update.message().text() != null) {
-                        Long chatId = update.message().chat().id();
-                        processUpdate(chatId, update);
-                    }
-                    if (update.callbackQuery() != null) {
-                        Long chatId = update.callbackQuery().message().chat().id();
-                        callBackUpd(chatId, update);
-                    }
-                });
+                .filter(update -> update.message() != null)
+                .filter(update -> update.message().text() != null)
+                .forEach(this::processUpdate);
         logger.info("Processing update: {}", updates);
+
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
 
-    private void callBackUpd(Long chatId, Update update) {
-        CallbackQuery callbackQuery = update.callbackQuery();
-        if (update.callbackQuery() != null) {
-            String data = callbackQuery.data();
-            if (data.equals(MenuDescription.Option1.name())) {
-                telegramBot.execute(new SendMessage(chatId, MenuDescription.Option1.getValue()));
-            } else if (data.equals(MenuDescription.Option2.name())
-            ) {
-                telegramBot.execute(new SendMessage(chatId, MenuDescription.Option2.getValue()));
-            } else if (data.equals(MenuDescription.Option3.name())) {
-                telegramBot.execute(new SendMessage(chatId, MenuDescription.Option3.getValue()));
-            } else if (data.equals(MenuDescription.Option4.name())) {
-                telegramBot.execute(new SendMessage(chatId, MenuDescription.Option4.getValue()));
-            }
-
-        }
-    }
-
-    private void processUpdate(Long chatId, Update update) {
+    private void processUpdate(Update update) {
         String userMessage = update.message().text();
+        Long chatId = update.message().chat().id();
         switch (userMessage) {
             case "/start":
                 telegramBot.execute(new SendMessage(chatId, "Какое-то приветственное сообщение, выберите команду из меню"));
                 break;
             case "/menu1":
-                InlineKeyboardButton button1 = new InlineKeyboardButton("Узнать информацию о приюте").callbackData(MenuDescription.Option1.name());
-                InlineKeyboardButton button2 = new InlineKeyboardButton("Как взять собаку из приюта").callbackData(MenuDescription.Option2.name());
-                InlineKeyboardButton button3 = new InlineKeyboardButton("Прислать отчет о питомце").callbackData(MenuDescription.Option3.name());
-                InlineKeyboardButton button4 = new InlineKeyboardButton("Позвать волонтера").callbackData(MenuDescription.Option4.name());
+                InlineKeyboardButton button1 = new InlineKeyboardButton("Узнать информацию о приюте").callbackData("option1"); //понять как вытащить ответ по нажатию. callbackdata или что-то другое
+                InlineKeyboardButton button2 = new InlineKeyboardButton("Как взять собаку из приюта").callbackData("option2");
+                InlineKeyboardButton button3 = new InlineKeyboardButton("Прислать отчет о питомце").callbackData("option2");
+                InlineKeyboardButton button4 = new InlineKeyboardButton("Позвать волонтера").callbackData("option2");
                 InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(
                         new InlineKeyboardButton[]{button1},
                         new InlineKeyboardButton[]{button2},
                         new InlineKeyboardButton[]{button3},
                         new InlineKeyboardButton[]{button4});
-
                 SendMessage sendMessage = new SendMessage(chatId, "Please select an option:").replyMarkup(inlineKeyboard);
                 telegramBot.execute(sendMessage);
                 break;
         }
+    }
+
+    // Информация о питомнике *считывание информации о питомнике и вывод в чат Bot
+    private void AboutTheNursery(long chatId) {
+        char[] buf = new char[NUMBER_SIMVOLOV_READ_FILE_ABOUT_THE_NURSERY];
+        try (FileReader reader = new FileReader(NAME_FILE_ABOUT_THE_NURSERY)) {
+            reader.read(buf);
+        } catch (IOException ex) {
+        }
+        telegramBot.execute(new SendMessage(chatId, new String(buf)));
     }
 }
