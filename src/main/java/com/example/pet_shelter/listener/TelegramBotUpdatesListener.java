@@ -6,7 +6,10 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.request.SendPhoto;
+import com.pengrad.telegrambot.request.SetMyCommands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +17,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.awt.*;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.io.File;
 import java.util.List;
 
 @Service
@@ -79,6 +81,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             if (data.equals("12")) {
                 AboutTheNursery(chatId);
             }
+            if (data.equals("13")) {
+                sendLocationPhoto(chatId);
+            }
         }
     }
 
@@ -90,6 +95,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 inlineButtonsListOfRules(chatId);
             } else if (data.equals("3")) {
                 buttonCynologist(chatId);
+            } else if (data.equals("6")) {
+                sendPetsDocuments(chatId);
             }
         }
     }
@@ -181,6 +188,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.execute(new SendMessage(chatId, "Привет " + firstName + " " + lastName));
     }
 
+    public void menuButton() { //откуда запускать ?
+        SetMyCommands message = new SetMyCommands(
+                new BotCommand("/start","bot started"),
+                new BotCommand("/menu1","about"),
+                new BotCommand("/menu2","consultation"),
+                new BotCommand("/menu3","for adoptive parents"));
+        telegramBot.execute(message);
+    }
 
 
     // Информация о питомнике *считывание информации о питомнике и вывод в чат Bot
@@ -191,5 +206,17 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         } catch (IOException ex) {
         }
         telegramBot.execute(new SendMessage(chatId, new String(buf)));
+    }
+
+    public void sendLocationPhoto(Long chatId) {
+        telegramBot.execute(new SendMessage(chatId, "Мы работаем по такому графику, наш адрес такой-то"));
+        java.io.File file = new File("1.png");
+        telegramBot.execute(new SendPhoto(chatId, file));
+    }
+
+    public void sendPetsDocuments(Long chatId) {
+        telegramBot.execute(new SendMessage(chatId, "Файл со списком нужных документов"));
+        java.io.File file = new File("Документы, чтобы взять собаку.docx");
+        telegramBot.execute(new SendDocument(chatId, file));
     }
 }
