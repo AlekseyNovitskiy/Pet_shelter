@@ -1,6 +1,5 @@
 package com.example.pet_shelter.configuration;
 
-import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 
 public enum MenuDescription {
     Option1("Информация о приюте"),
