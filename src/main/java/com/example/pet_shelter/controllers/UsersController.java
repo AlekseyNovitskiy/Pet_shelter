@@ -2,9 +2,7 @@ package com.example.pet_shelter.controllers;
 
 import com.example.pet_shelter.model.User;
 import com.example.pet_shelter.service.UsersService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 
@@ -22,6 +20,11 @@ public class UsersController {
     @GetMapping
     public Collection<User> getAllUsers(){
        return this.service.getAllUsers();
+    }
+
+    @PostMapping("/create")
+    public User createUser (@RequestBody User user) {
+        return this.service.createUser(user);
     }
 
 }
