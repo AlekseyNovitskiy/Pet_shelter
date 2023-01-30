@@ -71,7 +71,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             } else if (data.equals(MenuDescription.Option4.name())) {
                 telegramBot.execute(new SendMessage(chatId, MenuDescription.Option4.getValue()));
             }
-
         }
     }
     private void callBackUpdSecondMenu(Long chatId, Update update) {
