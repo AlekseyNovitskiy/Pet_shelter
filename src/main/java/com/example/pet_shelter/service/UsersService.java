@@ -18,4 +18,8 @@ public class UsersService {
     public Collection<User> getAllUsers() {
         return this.repository.findAll();
     }
+
+    public User createUser(User user) {
+        return this.repository.save(user);
+    }
 }

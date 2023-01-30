@@ -22,6 +22,11 @@ public class User {
     @Column(name = "users_phone_number")
     private String usersPhoneNumber;
 
+    public User() {
+    }
+    public User(String name, String lastName, String dog, String phone) {
+    }
+
 
     public Long getId() {
         return id;
