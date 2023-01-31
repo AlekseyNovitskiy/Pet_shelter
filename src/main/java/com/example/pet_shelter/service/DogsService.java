@@ -1,26 +1,36 @@
 package com.example.pet_shelter.service;
 
 import com.example.pet_shelter.model.Dogs;
-import com.example.pet_shelter.model.User;
 import com.example.pet_shelter.repository.DogsRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.transaction.Transactional;
-import java.io.IOException;
 import java.util.Optional;
 
 @Service
-@Transactional
 public class DogsService {
 
-
-    private DogsRepository dogsRepository;
-
-    public Dogs createDog(Dogs dogs) {          // Сохранение введенной в URL новой собаки
-        return this.dogsRepository.save(dogs);
+    private final DogsRepository dogsRepository;
+    public DogsService(DogsRepository dogsRepository) {
+        this.dogsRepository = dogsRepository;
     }
+
+
+    public Dogs createDog(Dogs dog) {           // Сохранение введенной в URL новой собаки
+        return dogsRepository.save(dog);
+    }
+
+    public Dogs deleteDog(Long id) {            // Удаление введенной в URL собаки
+        Dogs deleteDog = dogsRepository.findById(id).orElse(null);
+        dogsRepository.deleteById(id);
+        return deleteDog;
+    }
+
+    public Dogs updateDog(Long id,Dogs dog) {    // Обновление введенной в URL собаки
+        dogsRepository.deleteById(id);
+        return dogsRepository.save(dog);
+    }
+
+
 
     public Optional<Dogs> findDog(Long dogId) {
         return this.dogsRepository.findById(dogId);

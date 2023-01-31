@@ -12,5 +12,4 @@ public class PetShelterApplication {
 		SpringApplication.run(PetShelterApplication.class, args);
 	}
 
-	int anInt;
 }

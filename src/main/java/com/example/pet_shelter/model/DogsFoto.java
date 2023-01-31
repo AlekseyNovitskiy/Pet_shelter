@@ -3,30 +3,34 @@ package com.example.pet_shelter.model;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "dogs")
+@Table(name = "dogsfoto")
 public class DogsFoto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long dogId;       // Идентификатор
+    @Column(name = "id", nullable = false)
+    private Long id;               // Идентификатор
 
-    private String filePath;  // Название файла
+    @Column(name = "filepath")
+    private String filePath;       // Название файла
 
-    private long fileSize;    // Размер файла
+    @Column(name = "filesize")
+    private long fileSize;         // Размер файла
 
-    private String MediaType;   // Тип файла
+    @Column(name = "mediatype")
+    private String MediaType;      // Тип файла
 
     @Lob
-    private  byte[] fotoDog;  // массив для хранения фотографии
+    private byte[] fotoDog;       // Массив для хранения фотографии
 
-    @OneToOne                 // связь один к одному
+    @OneToOne                     // Связь один к одному
     private Dogs dog;
 
-    public Long getDogId() {
-        return dogId;
+    public Long getId() {
+        return id;
     }
 
-    public void setDogId(Long dogId) {
-        this.dogId = dogId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFilePath() {
@@ -45,6 +49,14 @@ public class DogsFoto {
         this.fileSize = fileSize;
     }
 
+    public String getMediaType() {
+        return MediaType;
+    }
+
+    public void setMediaType(String mediaType) {
+        MediaType = mediaType;
+    }
+
     public byte[] getFotoDog() {
         return fotoDog;
     }
@@ -59,14 +71,6 @@ public class DogsFoto {
 
     public void setDog(Dogs dog) {
         this.dog = dog;
-    }
-
-    public String getMediaType() {
-        return MediaType;
-    }
-
-    public void setMediaType(String mediaType) {
-        MediaType = mediaType;
     }
 
 }
