@@ -1,7 +1,6 @@
 package com.example.pet_shelter.listener;
 
 import com.example.pet_shelter.configuration.MenuDescription;
-import com.example.pet_shelter.model.User;
 import com.example.pet_shelter.service.UsersService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
@@ -18,11 +17,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.*;
 import java.io.File;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
