@@ -21,6 +21,8 @@ public class UsersService {
 
     // Метод добавление пользователя
     public Users createUser(Users user) {
+        // Приведение в соответствие номера телефона
+        user.setUserPhoneNumber(MatchingPhoneNumber(user.getUserPhoneNumber()));
         return this.usersRepository.save(user);
     }
 
@@ -32,9 +34,19 @@ public class UsersService {
     }
 
     // Метод изменения данных о пользователе
-    public Users updateUser(Long id,Users user) {
+    public Users updateUser(Long id, Users user) {
         usersRepository.deleteById(id);
+        // Приведение в соответствие номера телефона
+        user.setUserPhoneNumber(MatchingPhoneNumber(user.getUserPhoneNumber()));
         return usersRepository.save(user);
+    }
+
+    // Проверка веденного номера телефона
+    public String MatchingPhoneNumber(String telefone) {
+        if (telefone.chars().filter(Character::isDigit).count() == 11) {
+            String str = telefone.replaceAll("\\D+", "");
+            return ("+" + str.substring(0, 1) + "(" + str.substring(1, 4) + ")" + str.substring(4, 7) + "-" + str.substring(7, 9) + "-" + str.substring(9, 11));
+        } else throw new RuntimeException("Неправильный формат номера телефона");
     }
 
 }
