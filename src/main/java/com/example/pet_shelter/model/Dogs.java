@@ -1,6 +1,7 @@
 package com.example.pet_shelter.model;
 
 import javax.persistence.*;
+import java.util.Collection;
 
 @Entity
 @Table(name = "dogs")
@@ -19,6 +20,9 @@ public class Dogs {
 
     @Column(name = "info_dog")     // Информация о собаке
     private String infoDog;
+
+    @OneToMany(mappedBy = "dog")
+    Collection<Users> user;
 
     public Long getId() {
         return id;
@@ -41,9 +45,9 @@ public class Dogs {
     }
 
     public void setAge(int age) {
-        if (age < 0) {                // Проверка на отрицательное число
+        if (age < 0) {                 // Проверка на отрицательное число
             age *= -1;                 // Инвентаризация числа
-        } else if (age > 30) {       // Проверка на максимальный возраст
+        } else if (age > 30) {         // Проверка на максимальный возраст
             age = 0;
         }
         this.age = age;
