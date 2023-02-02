@@ -10,16 +10,19 @@ public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Long id;    // Идентификатор
+    private Long id;                 // Идентификатор
 
     @Column(name = "first_name")
-    private String firstName;  // Имя пользователя
+    private String firstName;       // Имя пользователя
 
     @Column(name = "last_name")
-    private String lastName;   //Фамилия пользователя
+    private String lastName;        //Фамилия пользователя
 
     @Column(name = "user_phone_number")
     private String userPhoneNumber; // Телефон пользователя
+
+    @Column(name = "user_email")
+    private String userEmail;        // e-mail пользователя
 
     @ManyToOne
     @JoinColumn(name = "dog_id")
@@ -55,6 +58,14 @@ public class Users {
 
     public void setUserPhoneNumber(String userPhoneNumber) {
         this.userPhoneNumber = userPhoneNumber;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 
     public Dogs getDog() {
