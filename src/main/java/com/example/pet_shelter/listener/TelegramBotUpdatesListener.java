@@ -1,25 +1,34 @@
 package com.example.pet_shelter.listener;
 
-import com.example.pet_shelter.configuration.MenuDescription;
 import com.example.pet_shelter.model.Users;
 import com.example.pet_shelter.service.UsersService;
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.google.gson.JsonObject;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.*;
+import com.pengrad.telegrambot.response.GetFileResponse;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 
 import javax.annotation.PostConstruct;
+import javax.print.Doc;
 import java.io.*;
 import java.io.File;
 import java.net.URI;
+import java.net.URL;
 import java.util.List;
+
+import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
@@ -173,6 +182,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         } else {
             switch (userMessage) {
                 case "/start":
+                    try {
+                        downloadPhotoFromChat(update);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                     telegramBot.execute(new SendMessage(chatId, "Какое-то приветственное сообщение, выберите команду из меню"));
                     break;
                 case "/menu1":
@@ -348,4 +362,33 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         usersService.createUser(user);
     }
 
+    public void downloadPhotoFromChat(Update update) throws IOException {
+        final PhotoSize photoSize = update.message().photo()[10];
+
+        if (photoSize != null && update.message()!=null) {
+        final String photoID = photoSize.fileId();
+
+        uploadFile(photoID);
+        }
+    }
+
+    public void uploadFile(String photo_id) throws IOException {
+        URL url = new URL("https://api.telegram.org/bot" + telegramBot.getToken() + "getFile?file_id=" + photo_id);
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+        String getFileResponse = br.readLine();
+
+        JSONObject jresult = new JSONObject(getFileResponse);
+        JSONObject path = jresult.getJSONObject("result");
+        String file_path = path.getString("file_path");
+        System.out.println(file_path);
+
+
+        File localFile = new File("src/main/resources/photos/" + photo_id);
+        InputStream is = new URL("https://api.telegram.org/file/bot" + telegramBot.getToken() + "/" + file_path).openStream();
+
+        copyInputStreamToFile(is, localFile);
+            br.close();
+            is.close();
+    }
 }
