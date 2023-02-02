@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.*;
 import java.io.File;
+import java.net.URI;
 import java.util.List;
 
 @Service
@@ -40,12 +41,22 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     @Autowired
     private TelegramBot telegramBot;
 
+    /**
+     * <i>Инициализация бота<i/> <br>
+     * Инициализация меню {@code menuButton()}
+     */
     @PostConstruct
     public void init() {
         menuButton();
         telegramBot.setUpdatesListener(this);
     }
 
+    /**
+     * <i>Обработка возможных апдейтов<i/>
+     *
+     * @param updates возможные апдейты
+     * @return
+     */
     @Override
     public int process(List<Update> updates) {
         updates.stream()
@@ -59,43 +70,43 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                         callBackUpd(chatId, update);
                         callBackUpdThirdMenu(chatId, update);
                         callBackUpdSecondMenu(chatId, update);
+                        callBackDataListOfRecommendations(chatId, update);
                     }
                 });
         logger.info("Processing update: {}", updates);
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
 
+    /**
+     * <i>Обработка колбэков первого меню</i>
+     *
+     * @param chatId идентификатор чата
+     * @param update апдейт
+     * @see com.pengrad.telegrambot.model.CallbackQuery
+     * @see com.pengrad.telegrambot.model.Update
+     */
     private void callBackUpd(Long chatId, Update update) {
         CallbackQuery callbackQuery = update.callbackQuery();
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
             if (data.equals("15")) {
-            } else if (data.equals(MenuDescription.Option2.name())
-            ) {
-                telegramBot.execute(new SendMessage(chatId, MenuDescription.Option2.getValue()));
-            } else if (data.equals(MenuDescription.Option3.name())) {
-                telegramBot.execute(new SendMessage(chatId, MenuDescription.Option3.getValue()));
-            } else if (data.equals(MenuDescription.Option4.name())) {
-                telegramBot.execute(new SendMessage(chatId, MenuDescription.Option4.getValue()));
-            }
-        }
-    }
-
-    private void callBackUpdSecondMenu(Long chatId, Update update) {
-        CallbackQuery callbackQuery = update.callbackQuery();
-        if (update.callbackQuery() != null) {
-            String data = callbackQuery.data();
-            if (data.equals("12")) {
+            } else if (data.equals("12")) {
                 AboutTheNursery(chatId);
-            }
-            if (data.equals("13")) {
-
+            } else if (data.equals("13")) {
                 sendLocationPhoto(chatId);
             }
         }
     }
 
-    private void callBackUpdThirdMenu(Long chatId, Update update) {
+    /**
+     * <i>Обработка колбэков 2-го меню</i>
+     *
+     * @param chatId идентификатор чата
+     * @param update апдейт
+     * @see com.pengrad.telegrambot.model.CallbackQuery
+     * @see com.pengrad.telegrambot.model.Update
+     */
+    private void callBackUpdSecondMenu(Long chatId, Update update) {
         CallbackQuery callbackQuery = update.callbackQuery();
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
@@ -103,14 +114,57 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 inlineButtonsListOfRules(chatId);
             } else if (data.equals("3")) {
                 buttonCynologist(chatId);
-            } else if (data.equals("6")) {
-                sendPetsDocuments(chatId);
             } else if (data.equals("4")) {
                 flagButton = 4; // Установка флага нажатия кнопки
             }
         }
     }
 
+    /**
+     * <i>Обработка колбэков списка рекомендаций</i>
+     *
+     * @param chatId идентификатор чата
+     * @param update апдейт
+     * @see com.pengrad.telegrambot.model.CallbackQuery
+     * @see com.pengrad.telegrambot.model.Update
+     */
+    private void callBackDataListOfRecommendations(Long chatId, Update update) {
+        CallbackQuery callbackQuery = update.callbackQuery();
+        if (update.callbackQuery() != null) {
+            String data = callbackQuery.data();
+            if (data.equals("6")) {
+                sendPetsDocuments(chatId);
+            }
+        }
+    }
+
+    /**
+     * <i>Обработка колбэков 3-го меню</i>
+     *
+     * @param chatId идентификатор чата
+     * @param update апдейт
+     * @see com.pengrad.telegrambot.model.CallbackQuery
+     * @see com.pengrad.telegrambot.model.Update
+     */
+    private void callBackUpdThirdMenu(Long chatId, Update update) {
+        CallbackQuery callbackQuery = update.callbackQuery();
+        if (update.callbackQuery() != null) {
+        }
+    }
+
+    /**
+     * <i>Ловим апдейты</i>
+     * Структура кнопок бота и откликов по ним
+     *
+     * @param chatId идентификатор чата
+     * @param update апдейт
+     * @see com.pengrad.telegrambot.request.SendMessage
+     * @see com.pengrad.telegrambot.model.request.InlineKeyboardMarkup
+     * @see com.pengrad.telegrambot.model.request.InlineKeyboardButton
+     * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
+     * @see com.pengrad.telegrambot.TelegramBot
+     * @see com.pengrad.telegrambot.model.Update
+     */
     private void processUpdate(Long chatId, Update update) {
         String userMessage = update.message().text();
         if (flagButton == 4) {
@@ -164,6 +218,16 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         }
     }
 
+    /**
+     * <i>Клавиатура списка правил</i>
+     *
+     * @param chatId идентификатор чата
+     * @see com.pengrad.telegrambot.request.SendMessage
+     * @see com.pengrad.telegrambot.model.request.InlineKeyboardMarkup
+     * @see com.pengrad.telegrambot.model.request.InlineKeyboardButton
+     * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
+     * @see com.pengrad.telegrambot.TelegramBot
+     */
     public void inlineButtonsListOfRules(Long chatId) {
         InlineKeyboardButton first = new InlineKeyboardButton("документы, чтобы взять собаку").callbackData("6");
         InlineKeyboardButton second = new InlineKeyboardButton("Транспортировка животного").callbackData("7");
@@ -182,6 +246,15 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.execute(msg);
     }
 
+    /**
+     * <i>Кнопка отклика кинолога</i>
+     *
+     * @param chatId идентификатор чата
+     * @see com.pengrad.telegrambot.request.SendMessage
+     * @see com.pengrad.telegrambot.model.request.InlineKeyboardMarkup
+     * @see com.pengrad.telegrambot.model.request.InlineKeyboardButton
+     * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
+     */
     public void buttonCynologist(Long chatId) {
         InlineKeyboardButton first = new InlineKeyboardButton("Советуем этих кинологов").callbackData("buttonCynologist");
         InlineKeyboardMarkup cynologistKeyboard = new InlineKeyboardMarkup(
@@ -190,19 +263,32 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.execute(msg);
     }
 
+    /**
+     * <i>Приветственное сообщение пользователя в чате</i>
+     *
+     * @param chatId идентификатор чата
+     * @param update апдейт
+     * @see com.pengrad.telegrambot.request.SendMessage
+     */
     public void greetings(Long chatId, Update update) {
         String firstName = update.message().chat().firstName();
         String lastName = update.message().chat().lastName();
         telegramBot.execute(new SendMessage(chatId, "Привет " + firstName + " " + lastName));
     }
 
+    /**
+     * <i>Кнопка меню бота</i>
+     *
+     * @see com.pengrad.telegrambot.model.BotCommand
+     * @see com.pengrad.telegrambot.request.SetMyCommands
+     */
     public void menuButton() {
         SetMyCommands message = new SetMyCommands(
                 new BotCommand("/start", "Запустить бота"),
                 new BotCommand("/menu1", "Узнать информацию о приюте"),
                 new BotCommand("/menu2", "Как взять собаку из приюта"),
                 new BotCommand("/menu3", "Прислать отчет о питомце"),
-                new BotCommand("/menu4", "Позвать волонтера"));//сделать отклик
+                new BotCommand("/menu4", "Позвать волонтера"));
         telegramBot.execute(message);
     }
 
@@ -217,6 +303,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.execute(new SendMessage(chatId, new String(buf)));
     }
 
+    /**
+     * <i>Высылает в чат сообщение с текстом, сообщение с изображением карты, навигацию по карте</i> <br>
+     *
+     * @param chatId идентификатор чата
+     * @see com.pengrad.telegrambot.request.SendMessage
+     * @see com.pengrad.telegrambot.request.SendLocation
+     * @see com.pengrad.telegrambot.request.SendPhoto
+     */
     public void sendLocationPhoto(Long chatId) {
         float latitude = (float) 59.82225018231752;
         float longitude = (float) 30.178212453672643;
@@ -228,6 +322,15 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.execute(location);
     }
 
+    /**
+     * <i>Высылает в чат документ</i>
+     * <br>
+     * Использует java.io метод {@link java.io.File#File(URI)}  File} <br>
+     * Использует pengrad метод {@link com.pengrad.telegrambot.request.SendMessage } <br>
+     * Использует pengrad метод {@link com.pengrad.telegrambot.request.SendDocument } <br>
+     *
+     * @param chatId идентификатор чата
+     */
     public void sendPetsDocuments(Long chatId) {
         telegramBot.execute(new SendMessage(chatId, "Файл со списком нужных документов"));
         java.io.File file = new File("Документы, чтобы взять собаку.docx");
