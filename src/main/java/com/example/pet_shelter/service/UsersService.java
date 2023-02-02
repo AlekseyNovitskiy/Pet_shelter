@@ -5,6 +5,7 @@ import com.example.pet_shelter.repository.UsersRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 @Service
 public class UsersService {
@@ -22,7 +23,12 @@ public class UsersService {
     // Метод добавление пользователя
     public Users createUser(Users user) {
         // Приведение в соответствие номера телефона
-        user.setUserPhoneNumber(MatchingPhoneNumber(user.getUserPhoneNumber()));
+        if (user.getUserPhoneNumber()!= null) {
+            user.setUserPhoneNumber(MatchingPhoneNumber(user.getUserPhoneNumber()));
+        }
+        if (!ValidityEmail(user.getUserEmail())){  // Если ошибка в e-mail, то просто записывать не будем
+            user.setUserEmail(null);
+        }
         return this.usersRepository.save(user);
     }
 
@@ -46,7 +52,21 @@ public class UsersService {
         if (telefone.chars().filter(Character::isDigit).count() == 11) {
             String str = telefone.replaceAll("\\D+", "");
             return ("+" + str.substring(0, 1) + "(" + str.substring(1, 4) + ")" + str.substring(4, 7) + "-" + str.substring(7, 9) + "-" + str.substring(9, 11));
-        } else throw new RuntimeException("Неправильный формат номера телефона");
+        }
+        return null;
+    }
+
+    // Проверка на валидность e-mail
+    public boolean ValidityEmail(String eMail) {
+        String regexPattern = "^(?=.{1,64}@)[ A-Za-z0-9_-]+(\\.[ A-Za-z0-9_-]+)*@[^-][ A-Za-z0-9-]+(\\.[ А-Za-z0-9-]+)*(\\.[ A-Za-z]{2,})$";
+        return patternMatches(eMail, regexPattern);
+    }
+
+    // Вспомогательный метод, соответствующий шаблону регулярных выражений
+    public static boolean patternMatches(String TheStringBeingChecked, String regexPattern) {
+        return Pattern.compile(regexPattern)
+                .matcher(TheStringBeingChecked)
+                .matches();
     }
 
 }
