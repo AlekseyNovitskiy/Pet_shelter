@@ -23,10 +23,10 @@ public class UsersService {
     // Метод добавление пользователя
     public Users createUser(Users user) {
         // Приведение в соответствие номера телефона
-        if (user.getUserPhoneNumber()!= null) {
+        if (user.getUserPhoneNumber() != null) {
             user.setUserPhoneNumber(MatchingPhoneNumber(user.getUserPhoneNumber()));
         }
-        if (!ValidityEmail(user.getUserEmail())){  // Если ошибка в e-mail, то просто записывать не будем
+        if (!ValidityEmail(user.getUserEmail())) {  // Если ошибка в e-mail, то просто записывать не будем
             user.setUserEmail(null);
         }
         return this.usersRepository.save(user);
@@ -42,24 +42,34 @@ public class UsersService {
     // Метод изменения данных о пользователе
     public Users updateUser(Long id, Users user) {
         usersRepository.deleteById(id);
-        // Приведение в соответствие номера телефона
-        user.setUserPhoneNumber(MatchingPhoneNumber(user.getUserPhoneNumber()));
+        // Приведение в соответствие телефона в случай количества символов не равное 11 номер телефона не записываем
+        if (user.getUserPhoneNumber() != null) {
+            user.setUserPhoneNumber(MatchingPhoneNumber(user.getUserPhoneNumber()));
+        }
+        if (!ValidityEmail(user.getUserEmail())) {  // Если ошибка в e-mail, то просто записывать не будем
+            user.setUserEmail(null);
+        }
         return usersRepository.save(user);
     }
 
-    // Проверка веденного номера телефона
+    // Валидность номера телефона
     public String MatchingPhoneNumber(String telefone) {
         if (telefone.chars().filter(Character::isDigit).count() == 11) {
             String str = telefone.replaceAll("\\D+", "");
-            return ("+" + str.substring(0, 1) + "(" + str.substring(1, 4) + ")" + str.substring(4, 7) + "-" + str.substring(7, 9) + "-" + str.substring(9, 11));
+            return ("+" + str.substring(0, 1) + "(" + str.substring(1, 4) + ")" + str.substring(4, 7)
+                    + "-" + str.substring(7, 9) + "-" + str.substring(9, 11));
         }
         return null;
     }
 
-    // Проверка на валидность e-mail
+    // Валидность e-mail
     public boolean ValidityEmail(String eMail) {
-        String regexPattern = "^(?=.{1,64}@)[ A-Za-z0-9_-]+(\\.[ A-Za-z0-9_-]+)*@[^-][ A-Za-z0-9-]+(\\.[ А-Za-z0-9-]+)*(\\.[ A-Za-z]{2,})$";
-        return patternMatches(eMail, regexPattern);
+        if (eMail == null) {
+            return false;
+        } else {
+            String regexPattern = "^[A-Za-z0-9+_.-]+@(.+)$";
+            return patternMatches(eMail, regexPattern);
+        }
     }
 
     // Вспомогательный метод, соответствующий шаблону регулярных выражений

@@ -31,7 +31,7 @@ public class DogsService {
     }
 
 
-
+    // Поиск всех питомцев
     public Optional<Dogs> findDog(Long dogId) {
         return this.dogsRepository.findById(dogId);
     }
