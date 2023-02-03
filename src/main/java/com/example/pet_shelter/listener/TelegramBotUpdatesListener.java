@@ -73,26 +73,29 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     public int process(List<Update> updates) {
         updates.stream()
                 .forEach(update -> {
-                    Long chatId = update.message().chat().id();
+
                     try {
-                        if(update.message().photo() != null)    // если фото приложено
+                        if(update.message() != null && update.message().photo() != null)    // если фото приложено
                         {
+                            Long chatId = update.message().chat().id();
                             telegramBot.execute(new SendMessage(chatId, "Начало загрузки"));
                             downloadPhotoFromChat(update);
                             telegramBot.execute(new SendMessage(chatId, "Успешная загрузка"));
                         }
                     } catch (Exception e) {
+                        Long chatId = update.message().chat().id();
                         telegramBot.execute(new SendMessage(chatId, "Ошибка, очень странно, сообщите мы разберемся!"));
                     }
                     if (update.message() != null && update.message().text() != null) {
+                        Long chatId = update.message().chat().id();
                         processUpdate(chatId, update);
                     }
                     if (update.callbackQuery() != null) {
-                        Long chatIdnew = update.callbackQuery().message().chat().id();
-                        callBackUpd(chatIdnew, update);
-                        callBackUpdThirdMenu(chatIdnew, update);
-                        callBackUpdSecondMenu(chatIdnew, update);
-                        callBackDataListOfRecommendations(chatIdnew, update);
+                        Long chatId = update.callbackQuery().message().chat().id();
+                        callBackUpd(chatId, update);
+                        callBackUpdThirdMenu(chatId, update);
+                        callBackUpdSecondMenu(chatId, update);
+                        callBackDataListOfRecommendations(chatId, update);
                     }
                 });
         logger.info("Processing update: {}", updates);
@@ -236,12 +239,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     SendMessage msg4 = new SendMessage(chatId, "Волонтер идёт !");
                     telegramBot.execute(msg4);
                     break;
-                case "/photo":   // Вынес команду для добовления фото
-                    telegramBot.execute(new SendMessage(chatId, "Прикрепите фото отдельно"));
-                    break;
                 default:
-                    telegramBot.execute(new SendMessage(chatId, "Странно"));
-
             }
         }
     }
@@ -316,8 +314,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 new BotCommand("/menu1", "Узнать информацию о приюте"),
                 new BotCommand("/menu2", "Как взять собаку из приюта"),
                 new BotCommand("/menu3", "Прислать отчет о питомце"),
-                new BotCommand("/menu4", "Позвать волонтера"),
-                new BotCommand("/photo", "Вложить фото"));
+                new BotCommand("/menu4", "Позвать волонтера"));
         telegramBot.execute(message);
     }
 
