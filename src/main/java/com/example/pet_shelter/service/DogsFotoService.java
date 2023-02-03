@@ -4,6 +4,7 @@ import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.model.DogsFoto;
 import com.example.pet_shelter.repository.DogsFotoRepository;
 import com.example.pet_shelter.repository.DogsRepository;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class DogsFotoService {
     private String FotoDogsDir;      // Директория фото собак
 
     // Загрузка фото собаки в базу данных и на диск
-    public void uploadFotoDog(Long id, MultipartFile file) throws IOException {
+    public void uploadFotoDog(Long id, @NotNull MultipartFile file) throws IOException {
 
         Dogs dog = dogsRepository.findById(id).orElseThrow();
         Path filePath = Path.of(FotoDogsDir, id + "." + getExtensions(file.getOriginalFilename()));
