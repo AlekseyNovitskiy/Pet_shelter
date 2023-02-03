@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
@@ -26,6 +27,8 @@ import java.io.*;
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
@@ -70,16 +73,26 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     public int process(List<Update> updates) {
         updates.stream()
                 .forEach(update -> {
+                    Long chatId = update.message().chat().id();
+                    try {
+                        if(update.message().photo() != null)    // если фото приложено
+                        {
+                            telegramBot.execute(new SendMessage(chatId, "Начало загрузки"));
+                            downloadPhotoFromChat(update);
+                            telegramBot.execute(new SendMessage(chatId, "Успешная загрузка"));
+                        }
+                    } catch (Exception e) {
+                        telegramBot.execute(new SendMessage(chatId, "Ошибка, очень странно, сообщите мы разберемся!"));
+                    }
                     if (update.message() != null && update.message().text() != null) {
-                        Long chatId = update.message().chat().id();
                         processUpdate(chatId, update);
                     }
                     if (update.callbackQuery() != null) {
-                        Long chatId = update.callbackQuery().message().chat().id();
-                        callBackUpd(chatId, update);
-                        callBackUpdThirdMenu(chatId, update);
-                        callBackUpdSecondMenu(chatId, update);
-                        callBackDataListOfRecommendations(chatId, update);
+                        Long chatIdnew = update.callbackQuery().message().chat().id();
+                        callBackUpd(chatIdnew, update);
+                        callBackUpdThirdMenu(chatIdnew, update);
+                        callBackUpdSecondMenu(chatIdnew, update);
+                        callBackDataListOfRecommendations(chatIdnew, update);
                     }
                 });
         logger.info("Processing update: {}", updates);
@@ -224,17 +237,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     telegramBot.execute(msg4);
                     break;
                 case "/photo":   // Вынес команду для добовления фото
-                    try {
-                        if(update.message().photo() == null)    // если фото не приложено
-                            telegramBot.execute(new SendMessage(chatId, "Фото отсутсвует"));
-                        else {
-                            downloadPhotoFromChat(update);    // // если фото приложено
-                            telegramBot.execute(new SendMessage(chatId, "Успешная загрузка"));
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+                    telegramBot.execute(new SendMessage(chatId, "Прикрепите фото отдельно"));
                     break;
+                default:
+                    telegramBot.execute(new SendMessage(chatId, "Странно"));
+
             }
         }
     }
@@ -371,32 +378,24 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     }
 
     public void downloadPhotoFromChat(Update update) throws IOException {
-        final PhotoSize photoSize = update.message().photo()[10];
-
-        if (photoSize != null && update.message()!=null) {
-        final String photoID = photoSize.fileId();
-
-        uploadFile(photoID);
-        }
-    }
-
-    public void uploadFile(String photo_id) throws IOException {
-        URL url = new URL("https://api.telegram.org/bot" + telegramBot.getToken() + "getFile?file_id=" + photo_id);
-
+        String file_id = update.message().photo()[update.message().photo().length-1].fileId();
+        URL url = new URL("https://api.telegram.org/bot" + telegramBot.getToken() + "/getFile?file_id=" + file_id);
+        System.out.println(url);
         BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
         String getFileResponse = br.readLine();
-
         JSONObject jresult = new JSONObject(getFileResponse);
         JSONObject path = jresult.getJSONObject("result");
         String file_path = path.getString("file_path");
         System.out.println(file_path);
+        File localFile = new File("./src/main/resources/" + file_path);
 
-
-        File localFile = new File("src/main/resources/photos/" + photo_id);
         InputStream is = new URL("https://api.telegram.org/file/bot" + telegramBot.getToken() + "/" + file_path).openStream();
-
         copyInputStreamToFile(is, localFile);
-            br.close();
-            is.close();
+        br.close();
+        is.close();
     }
+
+   /* public void uploadFile(Update update) throws IOException {
+
+    }*/
 }
