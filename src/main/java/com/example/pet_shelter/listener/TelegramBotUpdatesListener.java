@@ -182,11 +182,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         } else {
             switch (userMessage) {
                 case "/start":
-                    try {
-                        downloadPhotoFromChat(update);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
                     telegramBot.execute(new SendMessage(chatId, "Какое-то приветственное сообщение, выберите команду из меню"));
                     break;
                 case "/menu1":
@@ -227,6 +222,18 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 case "/menu4":
                     SendMessage msg4 = new SendMessage(chatId, "Волонтер идёт !");
                     telegramBot.execute(msg4);
+                    break;
+                case "/photo":   // Вынес команду для добовления фото
+                    try {
+                        if(update.message().photo() == null)    // если фото не приложено
+                            telegramBot.execute(new SendMessage(chatId, "Фото отсутсвует"));
+                        else {
+                            downloadPhotoFromChat(update);    // // если фото приложено
+                            telegramBot.execute(new SendMessage(chatId, "Успешная загрузка"));
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                     break;
             }
         }
@@ -302,7 +309,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 new BotCommand("/menu1", "Узнать информацию о приюте"),
                 new BotCommand("/menu2", "Как взять собаку из приюта"),
                 new BotCommand("/menu3", "Прислать отчет о питомце"),
-                new BotCommand("/menu4", "Позвать волонтера"));
+                new BotCommand("/menu4", "Позвать волонтера"),
+                new BotCommand("/photo", "Вложить фото"));
         telegramBot.execute(message);
     }
 
