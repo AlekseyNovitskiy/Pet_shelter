@@ -27,6 +27,7 @@ public class Users {
     @ManyToOne
     @JoinColumn(name = "dog_id")
     private Dogs dog;
+    
 
     public Long getId() {
         return id;

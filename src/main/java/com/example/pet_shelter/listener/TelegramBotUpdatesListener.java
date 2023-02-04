@@ -365,7 +365,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     // Добавление нового пользователя полученного в Telegram Bot
     public void createUser(Long chatId, String str) {
-        String[] strDivided = str.split(" "); // Разбивка строки данных пользователя
+        String[] strDivided = str.split("\"\\\\s*(\\\\s|,|!|\\\\.)\\\\s*\""); // Разбивка строки данных пользователя
         Users user = new Users();
         user.setFirstName(strDivided[0]);
         user.setLastName(strDivided[1]);
