@@ -1,5 +1,8 @@
 package com.example.pet_shelter.service;
 
+import com.example.pet_shelter.exceptions.DogNullParameterValueException;
+import com.example.pet_shelter.exceptions.UsersNullParameterValueException;
+import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.model.Users;
 import com.example.pet_shelter.repository.UsersRepository;
 import org.springframework.stereotype.Service;
@@ -22,12 +25,20 @@ public class UsersService {
 
     // Метод добавление пользователя
     public Users createUser(Users user) {
-        // Приведение в соответствие номера телефона
+        if (user.getFirstName().isBlank() || user.getFirstName().isBlank()) {
+            throw new UsersNullParameterValueException("Имя пользователя не указано");
+        }
+        if (user.getFirstName().isBlank() || user.getFirstName().isBlank()) {
+            throw new UsersNullParameterValueException("Фамилия пользователя не указана");
+        }
+        // Форматирование телефона пользователя, если телефон указан неверно получаем null
         if (user.getUserPhoneNumber() != null) {
             user.setUserPhoneNumber(MatchingPhoneNumber(user.getUserPhoneNumber()));
+        } else {
+            throw new UsersNullParameterValueException("Телефон пользователя не указан или не соответсвует формату");
         }
-        if (!ValidityEmail(user.getUserEmail())) {  // Если ошибка в e-mail, то просто записывать не будем
-            user.setUserEmail(null);
+        if (!ValidityEmail(user.getUserEmail())) {
+            throw new UsersNullParameterValueException("Почта пользователя не указана или не соответсвует формату");
         }
         return this.usersRepository.save(user);
     }
@@ -41,15 +52,16 @@ public class UsersService {
 
     // Метод изменения данных о пользователе
     public Users updateUser(Long id, Users user) {
-        usersRepository.deleteById(id);
-        // Приведение в соответствие телефона в случай количества символов не равное 11 номер телефона не записываем
-        if (user.getUserPhoneNumber() != null) {
-            user.setUserPhoneNumber(MatchingPhoneNumber(user.getUserPhoneNumber()));
+        Users updateUser = usersRepository.findById(id).orElse(null);
+        if (updateUser != null) {
+            updateUser.setFirstName(user.getFirstName());
+            updateUser.setLastName(user.getLastName());
+            updateUser.setUserPhoneNumber(user.getUserPhoneNumber());
+            updateUser.setUserEmail(user.getUserEmail());
+        } else {
+            throw new UsersNullParameterValueException("Недостаточно данных при попытке заменить данные у объекта users");
         }
-        if (!ValidityEmail(user.getUserEmail())) {  // Если ошибка в e-mail, то просто записывать не будем
-            user.setUserEmail(null);
-        }
-        return usersRepository.save(user);
+        return usersRepository.save(updateUser);
     }
 
     // Валидность номера телефона
@@ -67,7 +79,7 @@ public class UsersService {
         if (eMail == null) {
             return false;
         } else {
-            String regexPattern = "^[A-Za-z0-9+_.-]+@(.+)$";
+            String regexPattern = "^[A-Za-z0-9+_.-]+@(.+)$"; // В базе будет null
             return patternMatches(eMail, regexPattern);
         }
     }
