@@ -1,34 +1,26 @@
 package com.example.pet_shelter.listener;
 
+import com.example.pet_shelter.MenuMaker.MenuMaker;
 import com.example.pet_shelter.model.Users;
 import com.example.pet_shelter.service.UsersService;
-import com.fasterxml.jackson.databind.util.JSONPObject;
-import com.google.gson.JsonObject;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.*;
-import com.pengrad.telegrambot.response.GetFileResponse;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
 
 import javax.annotation.PostConstruct;
-import javax.print.Doc;
 import java.io.*;
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
@@ -38,8 +30,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private final UsersService usersService;
 
-    public TelegramBotUpdatesListener(UsersService usersService) {
+    private final MenuMaker menuMaker;
+
+    public TelegramBotUpdatesListener(UsersService usersService, MenuMaker menuMaker) {
         this.usersService = usersService;
+        this.menuMaker = menuMaker;
     }
 
     private Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
@@ -75,7 +70,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 .forEach(update -> {
 
                     try {
-                        if(update.message() != null && update.message().photo() != null)    // если фото приложено
+                        if (update.message() != null && update.message().photo() != null)    // если фото приложено
                         {
                             Long chatId = update.message().chat().id();
                             telegramBot.execute(new SendMessage(chatId, "Начало загрузки"));
@@ -136,9 +131,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
             if (data.equals("2")) {
-                inlineButtonsListOfRules(chatId);
+                telegramBot.execute(new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.inlineButtonsListOfRules(chatId)));
             } else if (data.equals("3")) {
-                buttonCynologist(chatId);
+                telegramBot.execute(new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.buttonCynologist(chatId))
+                );
             } else if (data.equals("4")) {
                 flagButton = 4; // Установка флага нажатия кнопки
             }
@@ -177,6 +173,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         }
     }
 
+
     /**
      * <i>Ловим апдейты</i>
      * Структура кнопок бота и откликов по ним
@@ -201,34 +198,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     telegramBot.execute(new SendMessage(chatId, "Какое-то приветственное сообщение, выберите команду из меню"));
                     break;
                 case "/menu1":
-                    InlineKeyboardButton one = new InlineKeyboardButton("рассказать о приюте").callbackData("12");
-                    InlineKeyboardButton two = new InlineKeyboardButton("расписание работы приюта и адрес, схему проезда").callbackData("13");
-                    InlineKeyboardButton three = new InlineKeyboardButton("техника безопасности на территории приюта").callbackData("14");
-                    InlineKeyboardButton four = new InlineKeyboardButton("записать контактные данные для связи").callbackData("15");
-                    InlineKeyboardButton five = new InlineKeyboardButton("позвать волонтера").callbackData("15");
-                    InlineKeyboardMarkup keyboardMenu2 = new InlineKeyboardMarkup(
-                            new InlineKeyboardButton[]{one},
-                            new InlineKeyboardButton[]{two},
-                            new InlineKeyboardButton[]{three},
-                            new InlineKeyboardButton[]{four},
-                            new InlineKeyboardButton[]{five});
-                    SendMessage sendMsg = new SendMessage(chatId, "Please select an option:").replyMarkup(keyboardMenu2);
+                    SendMessage sendMsg = new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.menu1Keyboard());
                     telegramBot.execute(sendMsg);
                     break;
                 case "/menu2":
                     greetings(chatId, update);
-                    InlineKeyboardButton first = new InlineKeyboardButton("правила знакомства с собакой").callbackData("1");
-                    InlineKeyboardButton second = new InlineKeyboardButton("список документов").callbackData("2");
-                    InlineKeyboardButton third = new InlineKeyboardButton("советы кинолога").callbackData("3");
-                    InlineKeyboardButton fourth = new InlineKeyboardButton("принять и записать контактные данные").callbackData("4");
-                    InlineKeyboardButton fifth = new InlineKeyboardButton("позвать волонтера").callbackData("5");
-                    InlineKeyboardMarkup keyboard3 = new InlineKeyboardMarkup(
-                            new InlineKeyboardButton[]{first},
-                            new InlineKeyboardButton[]{second},
-                            new InlineKeyboardButton[]{third},
-                            new InlineKeyboardButton[]{fourth},
-                            new InlineKeyboardButton[]{fifth});
-                    SendMessage msg = new SendMessage(chatId, "Please select an option:").replyMarkup(keyboard3);
+                    SendMessage msg = new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.menu2Keyboard());
                     telegramBot.execute(msg);
                     break;
                 case "/menu3":
@@ -242,51 +217,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 default:
             }
         }
-    }
-
-    /**
-     * <i>Клавиатура списка правил</i>
-     *
-     * @param chatId идентификатор чата
-     * @see com.pengrad.telegrambot.request.SendMessage
-     * @see com.pengrad.telegrambot.model.request.InlineKeyboardMarkup
-     * @see com.pengrad.telegrambot.model.request.InlineKeyboardButton
-     * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
-     * @see com.pengrad.telegrambot.TelegramBot
-     */
-    public void inlineButtonsListOfRules(Long chatId) {
-        InlineKeyboardButton first = new InlineKeyboardButton("документы, чтобы взять собаку").callbackData("6");
-        InlineKeyboardButton second = new InlineKeyboardButton("Транспортировка животного").callbackData("7");
-        InlineKeyboardButton third = new InlineKeyboardButton("Обустройство дома для щенка").callbackData("8");
-        InlineKeyboardButton fourth = new InlineKeyboardButton("Обустройство дома для взрослой собаки").callbackData("9");
-        InlineKeyboardButton fifth = new InlineKeyboardButton("Для собаки с ограниченными возможностями").callbackData("10");
-        InlineKeyboardButton six = new InlineKeyboardButton("причины отказа ").callbackData("11");
-        InlineKeyboardMarkup recomendationKeyboard = new InlineKeyboardMarkup(
-                new InlineKeyboardButton[]{first},
-                new InlineKeyboardButton[]{second},
-                new InlineKeyboardButton[]{third},
-                new InlineKeyboardButton[]{fourth},
-                new InlineKeyboardButton[]{fifth},
-                new InlineKeyboardButton[]{six});
-        SendMessage msg = new SendMessage(chatId, "Please select an option:").replyMarkup(recomendationKeyboard);
-        telegramBot.execute(msg);
-    }
-
-    /**
-     * <i>Кнопка отклика кинолога</i>
-     *
-     * @param chatId идентификатор чата
-     * @see com.pengrad.telegrambot.request.SendMessage
-     * @see com.pengrad.telegrambot.model.request.InlineKeyboardMarkup
-     * @see com.pengrad.telegrambot.model.request.InlineKeyboardButton
-     * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
-     */
-    public void buttonCynologist(Long chatId) {
-        InlineKeyboardButton first = new InlineKeyboardButton("Советуем этих кинологов").callbackData("buttonCynologist");
-        InlineKeyboardMarkup cynologistKeyboard = new InlineKeyboardMarkup(
-                first);
-        SendMessage msg = new SendMessage(chatId, "Please select an option:").replyMarkup(cynologistKeyboard);
-        telegramBot.execute(msg);
     }
 
     /**
@@ -375,7 +305,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     }
 
     public void downloadPhotoFromChat(Update update) throws IOException {
-        String file_id = update.message().photo()[update.message().photo().length-1].fileId();
+        String file_id = update.message().photo()[update.message().photo().length - 1].fileId();
         URL url = new URL("https://api.telegram.org/bot" + telegramBot.getToken() + "/getFile?file_id=" + file_id);
         System.out.println(url);
         BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -392,7 +322,4 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         is.close();
     }
 
-   /* public void uploadFile(Update update) throws IOException {
-
-    }*/
 }
