@@ -2,18 +2,13 @@ package com.example.pet_shelter.configuration;
 
 
 public enum MenuDescription {
-    Option1("Информация о приюте"),
-    Option2("Как взять собаку из приюта"),
-    Option3("Прислать отчет о питомце"),
-    Option4("Позвать волонтера");
+    AboutPetShelter,
+    SCHEDULE,
+    SAFETYRULES,
+    WRITECONTACS,
+    VOLUNTEERCALL,
 
-    private final String value;
+    CYNOLOGISTADVICE,
 
-    public String getValue() {
-        return value;
-    }
-
-    MenuDescription(String value) {
-        this.value = value;
-    }
+    MENULISTOFDOCUMENTS
 }

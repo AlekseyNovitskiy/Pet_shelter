@@ -35,10 +35,10 @@ public class UsersService {
         if (user.getUserPhoneNumber() != null) {
             user.setUserPhoneNumber(MatchingPhoneNumber(user.getUserPhoneNumber()));
         } else {
-            throw new UsersNullParameterValueException("Телефон пользователя не указан или не соответсвует формату");
+            throw new UsersNullParameterValueException("Телефон пользователя не указан или не соответствует формату");
         }
         if (!ValidityEmail(user.getUserEmail())) {
-            throw new UsersNullParameterValueException("Почта пользователя не указана или не соответсвует формату");
+            throw new UsersNullParameterValueException("Почта пользователя не указана или не соответствует формату");
         }
         return this.usersRepository.save(user);
     }

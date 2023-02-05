@@ -1,13 +1,13 @@
 package com.example.pet_shelter.listener;
 
 import com.example.pet_shelter.MenuMaker.MenuMaker;
+import com.example.pet_shelter.configuration.MenuDescription;
+import com.example.pet_shelter.exceptions.UsersNullParameterValueException;
 import com.example.pet_shelter.model.Users;
 import com.example.pet_shelter.service.UsersService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.*;
-import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
-import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.*;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -39,7 +39,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
-    private int flagButton; // Флаг нажатия кнопки
+    private boolean isWaitingUserData; //ожидаем сообщение с данными пользователя после нажатия кнопки "записать данные пользователя"
+    private boolean isProcess; //ожидаем поочередно загрузку фотографии и сообщения о состоянии
+    private boolean isPhoto; //ожидаем загрузку фото
 
     @Value("${nameFileAboutTheNursery}")
     String NAME_FILE_ABOUT_THE_NURSERY; // Место расположения файла информации о приюте
@@ -68,28 +70,15 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     public int process(List<Update> updates) {
         updates.stream()
                 .forEach(update -> {
-
-                    try {
-                        if (update.message() != null && update.message().photo() != null)    // если фото приложено
-                        {
-                            Long chatId = update.message().chat().id();
-                            telegramBot.execute(new SendMessage(chatId, "Начало загрузки"));
-                            downloadPhotoFromChat(update);
-                            telegramBot.execute(new SendMessage(chatId, "Успешная загрузка"));
-                        }
-                    } catch (Exception e) {
-                        Long chatId = update.message().chat().id();
-                        telegramBot.execute(new SendMessage(chatId, "Ошибка, очень странно, сообщите мы разберемся!"));
-                    }
-                    if (update.message() != null && update.message().text() != null) {
+                    if (update.message() != null && update.message().text() != null || update.message() != null && update.message().photo() != null) {
                         Long chatId = update.message().chat().id();
                         processUpdate(chatId, update);
                     }
                     if (update.callbackQuery() != null) {
                         Long chatId = update.callbackQuery().message().chat().id();
-                        callBackUpd(chatId, update);
-                        callBackUpdThirdMenu(chatId, update);
-                        callBackUpdSecondMenu(chatId, update);
+                        callBackUpdateMenu1(chatId, update);
+                        callBackUpdateMenu2(chatId, update);
+                        callBackUpdateMenu3(chatId, update);
                         callBackDataListOfRecommendations(chatId, update);
                     }
                 });
@@ -105,18 +94,24 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * @see com.pengrad.telegrambot.model.CallbackQuery
      * @see com.pengrad.telegrambot.model.Update
      */
-    private void callBackUpd(Long chatId, Update update) {
+    private void callBackUpdateMenu1(Long chatId, Update update) {
         CallbackQuery callbackQuery = update.callbackQuery();
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
-            if (data.equals("15")) {
-            } else if (data.equals("12")) {
+
+            if (data.equals(MenuDescription.WRITECONTACS.name())) {
+                isWaitingUserData = true;
+                telegramBot.execute(new SendMessage(chatId, "Введите данные пользователя в формате \"Имя Фамилия Мэйл Телефон (через пробел)\"  "));
+            } else if (data.equals(MenuDescription.AboutPetShelter.name())) {
                 AboutTheNursery(chatId);
-            } else if (data.equals("13")) {
+            } else if (data.equals(MenuDescription.SCHEDULE.name())) {
                 sendLocationPhoto(chatId);
+            } else if (data.equals(MenuDescription.VOLUNTEERCALL.name())) {
+                telegramBot.execute(new SendMessage(chatId, "Волонтер позван"));
             }
         }
     }
+
 
     /**
      * <i>Обработка колбэков 2-го меню</i>
@@ -126,17 +121,19 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * @see com.pengrad.telegrambot.model.CallbackQuery
      * @see com.pengrad.telegrambot.model.Update
      */
-    private void callBackUpdSecondMenu(Long chatId, Update update) {
+    private void callBackUpdateMenu2(Long chatId, Update update) {
         CallbackQuery callbackQuery = update.callbackQuery();
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
-            if (data.equals("2")) {
+            if (data.equals(MenuDescription.MENULISTOFDOCUMENTS.name())) {
                 telegramBot.execute(new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.inlineButtonsListOfRules(chatId)));
-            } else if (data.equals("3")) {
+            } else if (data.equals(MenuDescription.CYNOLOGISTADVICE.name())) {
                 telegramBot.execute(new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.buttonCynologist(chatId))
                 );
-            } else if (data.equals("4")) {
-                flagButton = 4; // Установка флага нажатия кнопки
+            } else if (data.equals(MenuDescription.WRITECONTACS.name())) {
+                isWaitingUserData = true;
+            } else if (data.equals(MenuDescription.VOLUNTEERCALL.name())) {
+                telegramBot.execute(new SendMessage(chatId, "Волонтер позван"));
             }
         }
     }
@@ -167,9 +164,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * @see com.pengrad.telegrambot.model.CallbackQuery
      * @see com.pengrad.telegrambot.model.Update
      */
-    private void callBackUpdThirdMenu(Long chatId, Update update) {
+    private void callBackUpdateMenu3(Long chatId, Update update) {
         CallbackQuery callbackQuery = update.callbackQuery();
         if (update.callbackQuery() != null) {
+            String data = callbackQuery.data();
+            if (data.equals("photo")) {
+                isPhoto = true;
+                telegramBot.execute(new SendMessage(chatId, "Загрузите фото вашего питомца  "));
+            }
         }
     }
 
@@ -189,9 +191,22 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      */
     private void processUpdate(Long chatId, Update update) {
         String userMessage = update.message().text();
-        if (flagButton == 4) {
-            flagButton = 0;  // Сброс флага нажатия кнопки
-            createUser(chatId, userMessage);
+        if (isWaitingUserData) {
+            try {
+                createUser(chatId, userMessage);
+                telegramBot.execute(new SendMessage(chatId, "Данные успешно записаны"));
+                isWaitingUserData = false;
+            } catch (UsersNullParameterValueException e) {
+                telegramBot.execute(new SendMessage(chatId, "Не удается распознать данные, попробуйте еще раз  " + e.getMessage()));
+            }
+        } else if (isPhoto) {
+            try {
+                downloadPhotoFromChat(update);
+                telegramBot.execute(new SendMessage(chatId, "Изображение успешно сохранено"));
+                isPhoto = false;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             switch (userMessage) {
                 case "/start":
@@ -207,14 +222,15 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     telegramBot.execute(msg);
                     break;
                 case "/menu3":
-                    SendMessage msg3 = new SendMessage(chatId, "Отчет о питомце:");
+                    SendMessage msg3 = new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.menu3Keyboard());
                     telegramBot.execute(msg3);
                     break;
                 case "/menu4":
                     SendMessage msg4 = new SendMessage(chatId, "Волонтер идёт !");
                     telegramBot.execute(msg4);
                     break;
-                default:
+                default:// TODO: добавить обработку неизвестных команд
+                    telegramBot.execute(new SendMessage(chatId, "Вы ввели что-то странное!"));
             }
         }
     }
@@ -295,7 +311,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     // Добавление нового пользователя полученного в Telegram Bot
     public void createUser(Long chatId, String str) {
-        String[] strDivided = str.split("\"\\\\s*(\\\\s|,|!|\\\\.)\\\\s*\""); // Разбивка строки данных пользователя
+
+        String[] strDivided = str.split(" "); // Разбивка строки данных пользователя
         Users user = new Users();
         user.setFirstName(strDivided[0]);
         user.setLastName(strDivided[1]);

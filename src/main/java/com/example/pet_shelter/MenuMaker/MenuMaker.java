@@ -17,11 +17,11 @@ public class MenuMaker {
      * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
      */
     public InlineKeyboardMarkup menu1Keyboard() {
-        InlineKeyboardButton one = new InlineKeyboardButton("рассказать о приюте").callbackData("12");
-        InlineKeyboardButton two = new InlineKeyboardButton("расписание работы приюта и адрес, схему проезда").callbackData("13");
-        InlineKeyboardButton three = new InlineKeyboardButton("техника безопасности на территории приюта").callbackData("14");
-        InlineKeyboardButton four = new InlineKeyboardButton("записать контактные данные для связи").callbackData("15");
-        InlineKeyboardButton five = new InlineKeyboardButton("позвать волонтера").callbackData("15");
+        InlineKeyboardButton one = new InlineKeyboardButton("рассказать о приюте").callbackData("AboutPetShelter"); //сделано
+        InlineKeyboardButton two = new InlineKeyboardButton("расписание работы приюта и адрес, схему проезда").callbackData("SCHEDULE"); //сделано
+        InlineKeyboardButton three = new InlineKeyboardButton("техника безопасности на территории приюта").callbackData("SAFETYRULES");
+        InlineKeyboardButton four = new InlineKeyboardButton("записать контактные данные для связи").callbackData("WRITECONTACS"); //сделано
+        InlineKeyboardButton five = new InlineKeyboardButton("позвать волонтера").callbackData("VOLUNTEERCALL");//сделано
         InlineKeyboardMarkup keyboardMenu1 = new InlineKeyboardMarkup(
                 new InlineKeyboardButton[]{one},
                 new InlineKeyboardButton[]{two},
@@ -41,10 +41,10 @@ public class MenuMaker {
      */
     public InlineKeyboardMarkup menu2Keyboard() {
         InlineKeyboardButton first = new InlineKeyboardButton("правила знакомства с собакой").callbackData("1");
-        InlineKeyboardButton second = new InlineKeyboardButton("список документов").callbackData("2");
-        InlineKeyboardButton third = new InlineKeyboardButton("советы кинолога").callbackData("3");
-        InlineKeyboardButton fourth = new InlineKeyboardButton("принять и записать контактные данные").callbackData("4");
-        InlineKeyboardButton fifth = new InlineKeyboardButton("позвать волонтера").callbackData("5");
+        InlineKeyboardButton second = new InlineKeyboardButton("список документов").callbackData("MENULISTOFDOCUMENTS"); //сделано
+        InlineKeyboardButton third = new InlineKeyboardButton("советы кинолога").callbackData("CYNOLOGISTADVICE");//сделано
+        InlineKeyboardButton fourth = new InlineKeyboardButton("принять и записать контактные данные").callbackData("WRITECONTACS");//сделано
+        InlineKeyboardButton fifth = new InlineKeyboardButton("позвать волонтера").callbackData("VOLUNTEERCALL");//сделано
         InlineKeyboardMarkup keyboard2 = new InlineKeyboardMarkup(
                 new InlineKeyboardButton[]{first},
                 new InlineKeyboardButton[]{second},
@@ -53,6 +53,22 @@ public class MenuMaker {
                 new InlineKeyboardButton[]{fifth});
         return keyboard2;
     }
+
+    /**
+     * <i>Клавиатура menu3</i>
+     *
+     * @return
+     * @see com.pengrad.telegrambot.model.request.InlineKeyboardMarkup
+     * @see com.pengrad.telegrambot.model.request.InlineKeyboardButton
+     * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
+     */
+    public InlineKeyboardMarkup menu3Keyboard() {
+        InlineKeyboardButton first = new InlineKeyboardButton("отправить отчет").callbackData("photo");
+        InlineKeyboardMarkup keyboard2 = new InlineKeyboardMarkup(
+                first);
+        return keyboard2;
+    }
+
 
     /**
      * <i>Клавиатура списка правил</i>
