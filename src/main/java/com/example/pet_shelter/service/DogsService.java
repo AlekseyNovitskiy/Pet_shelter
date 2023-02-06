@@ -1,38 +1,71 @@
 package com.example.pet_shelter.service;
 
+import com.example.pet_shelter.exceptions.DogNullParameterValueException;
 import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.repository.DogsRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.Collection;
+
 
 @Service
 public class DogsService {
 
     private final DogsRepository dogsRepository;
+
     public DogsService(DogsRepository dogsRepository) {
         this.dogsRepository = dogsRepository;
     }
 
+    public Collection<Dogs> getAllDogs() {
+        return this.dogsRepository.findAll();
+    }
 
-    public Dogs createDog(Dogs dog) {           // Сохранение введенной в URL новой собаки
+    /**
+     * <i>Заносит в базу созданный объект питомца.
+     * Если объект пуст будует выкинуто исключение DogNullParameterValueException.</i>
+     *
+     * @param dog объект питомца
+     * @see com.example.pet_shelter.repository.DogsRepository
+     */
+    public Dogs createDogInDB(Dogs dog) {
+        if (dog.getNickname().isBlank() || dog.getNickname().isEmpty()) {
+            throw new DogNullParameterValueException("Кличка питомца не указана");
+        }
         return dogsRepository.save(dog);
     }
 
-    public Dogs deleteDog(Long id) {            // Удаление введенной в URL собаки
+    /**
+     * <i>Удаляет из базы питомца по id</i>
+     *
+     * @param id Id питомца в базе данных
+     * @see com.example.pet_shelter.repository.DogsRepository
+     */
+    public Dogs deleteDog(Long id) {
         Dogs deleteDog = dogsRepository.findById(id).orElse(null);
         dogsRepository.deleteById(id);
         return deleteDog;
     }
 
-    public Dogs updateDog(Long id,Dogs dog) {    // Обновление введенной в URL собаки
-        dogsRepository.deleteById(id);
-        return dogsRepository.save(dog);
-    }
-
-
-    // Поиск всех питомцев
-    public Optional<Dogs> findDog(Long dogId) {
-        return this.dogsRepository.findById(dogId);
+    /**
+     * <i>Заменяет старые параметры питомца на те что были переданы.
+     * Если объект по id не найден будет выкинуто исключение DogNullParameterValueException.
+     * При отсутсвии одного из полей у передаваемого объекта dog будет выкинуто исключение NullPointerException.
+     * </i>
+     *
+     * @param id  Id питомца в базе данных
+     * @param dog объект питомца
+     * @see com.example.pet_shelter.repository.DogsRepository
+     */
+    public Dogs updateDog(Long id, Dogs dog) {
+        Dogs updateDog = dogsRepository.findById(id).orElse(null);
+        if (updateDog != null) {
+            updateDog.setNickname(dog.getNickname());
+            updateDog.setAge(dog.getAge());
+            updateDog.setInfoDog(dog.getInfoDog());
+        } else {
+            throw new DogNullParameterValueException("Недостаточно данных при попытке заменить данные у объекта dogs");
+        }
+        return dogsRepository.save(updateDog);
     }
 }

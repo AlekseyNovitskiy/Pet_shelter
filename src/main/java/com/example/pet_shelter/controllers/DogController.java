@@ -5,6 +5,11 @@ import com.example.pet_shelter.model.DogsFoto;
 import com.example.pet_shelter.service.DogsFotoService;
 import com.example.pet_shelter.service.DogsService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/dogs")
@@ -33,43 +39,82 @@ public class DogController {
         this.dogsFotoService = dogsFotoService;
     }
 
+    @Operation(summary = "Внесение данных о новой питомце\"",
+            responses = {@ApiResponse(
+                    responseCode = "200",
+                    description = "Информация о питомце занесена",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = Dogs.class))
+                    ))},tags = "DOG")
+
     // Внесение данных о новой собаке
     @PostMapping("/create")   // Создание новой записи о собаке
-    @Operation(summary = "Внесение данных о новой питомце")
+
     public Dogs createDog(@RequestBody Dogs dog) {
-        return this.dogsService.createDog(dog);
+        return this.dogsService.createDogInDB(dog);
     }
 
+
+    @Operation(summary = "Удаление информации о питомце",
+            responses = {@ApiResponse(
+                    responseCode = "200",
+                    description = "Информация о питомце удалена",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    ))},tags = "DOG")
     // Удаление информации о собаке
     @DeleteMapping("/delete/{id}")
-    @Operation(summary = "Удаление данных о питомце")
-    public Dogs deleteDog(@PathVariable("id") Long id) {
+    public Dogs deleteDog(@Parameter(description = "Id питомца", example = "1") @PathVariable("id") Long id) {
         return this.dogsService.deleteDog(id);
     }
 
+    @Operation(summary = "Изменение данных о питомце",
+            responses = {@ApiResponse(
+                    responseCode = "200",
+                    description = "Информация о питомце изменена",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = Dogs.class))
+                    ))},tags = "DOG")
     // Изменение информации о собаке
     @PutMapping("/update/{id}")
-    @Operation(summary = "Изменение данных о питомце")
-    public Dogs deleteDog(@PathVariable("id") Long id, @RequestBody Dogs dog) {
+    public Dogs deleteDog(@Parameter(description = "Id питомца", example = "1") @PathVariable("id") Long id, @RequestBody Dogs dog) {
         return this.dogsService.updateDog(id, dog);
     }
 
+    @Operation(summary = "Загрузка фотографии питомца",
+            responses = {@ApiResponse(
+                    responseCode = "200",
+                    description = "Фотография загружена",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    ))},tags = "DOG")
     // Загрузка фотографии собаки
     @PostMapping(value = "/{id}/load/fotoDog", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Загрузка фотографии питомца")
     // Прикрепление фото собаки
-    public ResponseEntity<String> uploadFotoDog(@PathVariable Long id, @RequestParam MultipartFile fotoDog) throws IOException {
+    public ResponseEntity<String> uploadFotoDog(@Parameter(description = "Id питомца", example = "1") @PathVariable Long id, @Parameter(description = "Путь к фотографии") @RequestParam MultipartFile fotoDog) throws
+
+            IOException {
         if (fotoDog.getSize() >= SIZE_FOTO_DOG) {         // Ограничение размера файла
             return ResponseEntity.badRequest().body("Файл большого размера");
         }
         dogsFotoService.uploadFotoDog(id, fotoDog);
-        return ResponseEntity.ok().build();
-    }
+        return ResponseEntity.ok().
 
+                build();
+
+    }
+    @Operation(summary = "Просмотр фотографии питомца",
+            responses = {@ApiResponse(
+                    responseCode = "200",
+                    description = "Фотография найдена",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE
+                    ))},tags = "DOG")
     // Просмотр фотографии собаки
     @GetMapping(value = "/{id}/fotoDog")
-    @Operation(summary = "Просмотр фотографии питомца")
-    public void downloadFotoDog(@PathVariable Long id, HttpServletResponse response) throws IOException {
+    public void downloadFotoDog(@Parameter(description = "Id питомца", example = "1") @PathVariable Long id, HttpServletResponse response) throws IOException {
         DogsFoto dogsFoto = dogsFotoService.findFotoDog(id);
         Path path = Path.of(dogsFoto.getFilePath());
         try (InputStream is = Files.newInputStream(path);
