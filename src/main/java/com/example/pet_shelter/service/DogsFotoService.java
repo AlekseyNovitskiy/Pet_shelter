@@ -6,6 +6,7 @@ import com.example.pet_shelter.repository.DogsFotoRepository;
 import com.example.pet_shelter.repository.DogsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,7 +31,15 @@ public class DogsFotoService {
     @Value("${dir.path.FotoDogs}")
     private String FotoDogsDir;      // Директория фото собак
 
-    // Загрузка фото собаки в базу данных и на диск
+    /**
+     * <b>Загрузка фото питомца в базу данных и на диск</b>
+     * <br> Используется метод репозитория {@link JpaRepository#findById(Object)}
+     * <br> Используется метод репозитория {@link JpaRepository#save(Object)}
+     * <br> Используется метод репозитория {@link DogsFotoService#getExtensions(String)}
+     * @param id   идентификатор питомца
+     * @param file считываемый файл
+     * @throws IOException - может возникнуть исключение ввода/вывода
+     */
     public void uploadFotoDog(Long id, MultipartFile file) throws IOException {
 
         Dogs dog = dogsRepository.findById(id).orElseThrow();
@@ -54,18 +63,34 @@ public class DogsFotoService {
         dogsFotoRepository.save(dogsFoto);
     }
 
+    /** <b> Формирует имя файла </b>
+     * @return Возвращает имя файла
+     */
     private String getExtensions(String fileName) {
         return fileName.substring(fileName.lastIndexOf(".") + 1);
 
     }
-    // Поиск собаки по id
-    public Dogs findDog(Long gogId) {
-        return dogsRepository.findById(gogId).orElseThrow();
+
+    /**
+     * <b>Поиск питомца по его id идентификатору</b>
+     * <br> Используется метод репозитория {@link JpaRepository#findById(Object)}
+     * @param dogId идентификатор питомца
+     * @return Возвращает найденного питомца
+     */
+    public Dogs findDog(Long dogId) {
+        return dogsRepository.findById(dogId).orElseThrow();
     }
 
+    /**
+     * <b>Поиск фото собаки по id идентификатору питомца</b>
+     * <br> Используется метод репозитория {@link JpaRepository#findById(Object)}
+     * @param dogId идентификатор питомца
+     * @return Возвращает объект фото
+     * @throws IOException - может возникнуть исключение ввода/вывода
+     */
     // Поиск фото собаки по id
-    public DogsFoto findFotoDog(Long id) {
-        return dogsFotoRepository.findById(id).orElseThrow();
+    public DogsFoto findFotoDog(Long dogId) {
+        return dogsFotoRepository.findById(dogId).orElseThrow();
     }
 
 }
