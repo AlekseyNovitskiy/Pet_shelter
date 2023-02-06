@@ -24,6 +24,11 @@ public class ReportUsers {
 
     private String report;        // Текст отчета
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private Users user;
+
+
     public Long getId() {
         return id;
     }

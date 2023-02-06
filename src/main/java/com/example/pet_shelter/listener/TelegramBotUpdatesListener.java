@@ -328,21 +328,28 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     }
 
     public void downloadPhotoFromChat(Update update) throws IOException {
-        String file_id = update.message().photo()[update.message().photo().length - 1].fileId();
-        URL url = new URL("https://api.telegram.org/bot" + telegramBot.getToken() + "/getFile?file_id=" + file_id);
-        System.out.println(url);
-        BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
-        String getFileResponse = br.readLine();
-        JSONObject jresult = new JSONObject(getFileResponse);
-        JSONObject path = jresult.getJSONObject("result");
-        String file_path = path.getString("file_path");
-        System.out.println(file_path);
-        File localFile = new File("./src/main/resources/" + file_path);
 
-        InputStream is = new URL("https://api.telegram.org/file/bot" + telegramBot.getToken() + "/" + file_path).openStream();
-        copyInputStreamToFile(is, localFile);
-        br.close();
-        is.close();
+        if (update.message() != null && update.message().photo() != null) {
+
+            String file_id = update.message().photo()[update.message().photo().length - 1].fileId();
+            URL url = new URL("https://api.telegram.org/bot" + telegramBot.getToken() + "/getFile?file_id=" + file_id);
+           // System.out.println(url);
+            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+            String getFileResponse = br.readLine();
+            JSONObject jresult = new JSONObject(getFileResponse);
+            JSONObject path = jresult.getJSONObject("result");
+            String file_path = path.getString("file_path");
+           // System.out.println(file_path);
+            File localFile = new File("./src/main/resources/" + file_path);
+
+            InputStream is = new URL("https://api.telegram.org/file/bot" + telegramBot.getToken() + "/" + file_path).openStream();
+            copyInputStreamToFile(is, localFile);
+            br.close();
+            is.close();
+
+
+
+
+        }
     }
-
 }
