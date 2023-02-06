@@ -73,7 +73,7 @@ class UserControllerTest {
         users.setLastName("Doe");
         users.setUserEmail("jane.doe@example.org");
         users.setUserPhoneNumber("4105551212");
-        when(usersService.createUser((Users) any())).thenReturn(users);
+        when(usersService.createUserInDb((Users) any())).thenReturn(users);
 
         Dogs dogs1 = new Dogs();
         dogs1.setAge(1);
@@ -162,7 +162,8 @@ class UserControllerTest {
         users1.setUserEmail("jane.doe@example.org");
         users1.setUserPhoneNumber("4105551212");
         String content = (new ObjectMapper()).writeValueAsString(users1);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/user/update/dog/{id}", 11L)
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(
+                "/user/update/dog/{id}", 11L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content);
         MockMvcBuilders.standaloneSetup(userController)
@@ -191,7 +192,7 @@ class UserControllerTest {
         users.setLastName("Doe");
         users.setUserEmail("jane.doe@example.org");
         users.setUserPhoneNumber("4105551212");
-        when(usersService.updateUser((Long) any(), (Users) any())).thenReturn(users);
+        when(usersService.updateUser(any(), (Users) any())).thenReturn(users);
 
         Dogs dogs1 = new Dogs();
         dogs1.setAge(1);
@@ -206,10 +207,13 @@ class UserControllerTest {
         users1.setLastName("Doe");
         users1.setUserEmail("jane.doe@example.org");
         users1.setUserPhoneNumber("4105551212");
+
         String content = (new ObjectMapper()).writeValueAsString(users1);
+
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/user/update/{id}", 11L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content);
+
         MockMvcBuilders.standaloneSetup(userController)
                 .build()
                 .perform(requestBuilder)

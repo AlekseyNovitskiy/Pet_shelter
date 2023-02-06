@@ -69,7 +69,7 @@ class DogsServiceTest {
         dogs1.setId(11L);
         dogs1.setInfoDog("Info Dog");
         dogs1.setNickname("Sharik");
-        assertSame(dogs, dogsService.createDog(dogs1));
+        assertSame(dogs, dogsService.createDogInDB(dogs1));
         verify(dogsRepository).save((Dogs) any());
     }
 
@@ -80,18 +80,24 @@ class DogsServiceTest {
         dogs.setId(11L);
         dogs.setInfoDog("Info Dog");
         dogs.setNickname("Sharik");
+
         when(dogsRepository.save((Dogs) any())).thenReturn(dogs);
+
         Dogs dogs1 = mock(Dogs.class);
+
         when(dogs1.getNickname()).thenReturn("");
         doNothing().when(dogs1).setAge(anyInt());
         doNothing().when(dogs1).setId((Long) any());
         doNothing().when(dogs1).setInfoDog((String) any());
         doNothing().when(dogs1).setNickname((String) any());
+
         dogs1.setAge(1);
         dogs1.setId(11L);
         dogs1.setInfoDog("Info Dog");
         dogs1.setNickname("Sharik");
-        assertThrows(DogNullParameterValueException.class, () -> dogsService.createDog(dogs1));
+
+        assertThrows(DogNullParameterValueException.class, () -> dogsService.createDogInDB(dogs1));
+
         verify(dogs1).getNickname();
         verify(dogs1).setAge(anyInt());
         verify(dogs1).setId((Long) any());
@@ -173,7 +179,7 @@ class DogsServiceTest {
     }
 
     @Test
-    void testUpdateDog4() {
+    void testUpdateDog3() {
         Dogs dogs = new Dogs();
         dogs.setAge(1);
         dogs.setId(11L);

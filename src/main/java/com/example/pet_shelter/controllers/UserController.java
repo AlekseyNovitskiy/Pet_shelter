@@ -1,6 +1,5 @@
 package com.example.pet_shelter.controllers;
 
-import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.model.Users;
 import com.example.pet_shelter.service.UsersService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,11 +60,11 @@ public class UserController {
                     )
             })
     @PostMapping("/create")
-    public Users createUser(@Parameter(
+    public Users createUserInDb(@Parameter(
             description = "Полные данные пользователя",
             example = "{firstName: Name, lastName : LastName, userPhoneNumber : +75558804420, userEmail: mail@mail.ru}")
                             @RequestBody Users user) {
-        return this.usersService.createUser(user);
+        return this.usersService.createUserInDb(user);
     }
 
     @Operation(
