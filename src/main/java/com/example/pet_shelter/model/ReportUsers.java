@@ -13,6 +13,7 @@ public class ReportUsers {
     @Column(name = "filepath")
     private String filePath;       // Название файла
 
+
     @Column(name = "filesize")
     private long fileSize;         // Размер файла
 
