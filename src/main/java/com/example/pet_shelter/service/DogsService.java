@@ -1,63 +1,71 @@
 package com.example.pet_shelter.service;
 
+import com.example.pet_shelter.exceptions.DogNullParameterValueException;
 import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.repository.DogsRepository;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.Collection;
+
 
 @Service
 public class DogsService {
 
     private final DogsRepository dogsRepository;
+
     public DogsService(DogsRepository dogsRepository) {
         this.dogsRepository = dogsRepository;
     }
 
+    public Collection<Dogs> getAllDogs() {
+        return this.dogsRepository.findAll();
+    }
+
     /**
-     * <b> Добавление питомца в БД</b>
-     * <br> Используется метод репозитория {@link JpaRepository#save(Object)}
-     * @param dog класс сущности
-     * @return Возращает сохраненного питомца
+     * <i>Заносит в базу созданный объект питомца.
+     * Если объект пуст будует выкинуто исключение DogNullParameterValueException.</i>
+     *
+     * @param dog объект питомца
+     * @see com.example.pet_shelter.repository.DogsRepository
      */
-    public Dogs createDog(Dogs dog) {           // Сохранение введенной в URL новой собаки
+    public Dogs createDogInDB(Dogs dog) {
+        if (dog.getNickname().isBlank() || dog.getNickname().isEmpty()) {
+            throw new DogNullParameterValueException("Кличка питомца не указана");
+        }
         return dogsRepository.save(dog);
     }
 
-
     /**
-     * <b> Удаление питомца из БД</b>
-     * <br> Используется метод репозитория {@link JpaRepository#deleteById(Object)}
-     * @param id идентификатор питомца
-     * @return Возращает удаленного питомца
+     * <i>Удаляет из базы питомца по id</i>
+     *
+     * @param id Id питомца в базе данных
+     * @see com.example.pet_shelter.repository.DogsRepository
      */
-    public Dogs deleteDog(Long id) {            // Удаление введенной в URL собаки
+    public Dogs deleteDog(Long id) {
         Dogs deleteDog = dogsRepository.findById(id).orElse(null);
         dogsRepository.deleteById(id);
         return deleteDog;
     }
 
     /**
-     * <b> Изменение информации питомца в БД</b>
-     * <br> Используется метод репозитория {@link JpaRepository#save(Object)}
-     * <br> Используется метод репозитория {@link JpaRepository#deleteById(Object)}
-     * @param id идентификатор питомца
-     * @param dog класс Dogs
-     * @return Возращает измененного питомца
-     */
-    public Dogs updateDog(Long id,Dogs dog) {    // Обновление введенной в URL собаки
-        dogsRepository.deleteById(id);
-        return dogsRepository.save(dog);
-    }
-
-    /** Поиск информации питомца в БД по его id идентификатору
+     * <i>Заменяет старые параметры питомца на те что были переданы.
+     * Если объект по id не найден будет выкинуто исключение DogNullParameterValueException.
+     * При отсутсвии одного из полей у передаваемого объекта dog будет выкинуто исключение NullPointerException.
+     * </i>
      *
-     * @param dogId идентификатор питомца
-     * @return Возращает питомца из БД по id идентификатору питомца, может вернуть Null
+     * @param id  Id питомца в базе данных
+     * @param dog объект питомца
+     * @see com.example.pet_shelter.repository.DogsRepository
      */
-    // Поиск всех питомцев
-    public Optional<Dogs> findDog(Long dogId) {
-        return this.dogsRepository.findById(dogId);
+    public Dogs updateDog(Long id, Dogs dog) {
+        Dogs updateDog = dogsRepository.findById(id).orElse(null);
+        if (updateDog != null) {
+            updateDog.setNickname(dog.getNickname());
+            updateDog.setAge(dog.getAge());
+            updateDog.setInfoDog(dog.getInfoDog());
+        } else {
+            throw new DogNullParameterValueException("Недостаточно данных при попытке заменить данные у объекта dogs");
+        }
+        return dogsRepository.save(updateDog);
     }
 }

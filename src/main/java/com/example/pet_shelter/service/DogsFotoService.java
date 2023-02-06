@@ -4,6 +4,7 @@ import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.model.DogsFoto;
 import com.example.pet_shelter.repository.DogsFotoRepository;
 import com.example.pet_shelter.repository.DogsRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;

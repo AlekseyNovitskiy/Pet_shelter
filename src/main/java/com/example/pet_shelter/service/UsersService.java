@@ -1,8 +1,8 @@
 package com.example.pet_shelter.service;
 
+import com.example.pet_shelter.exceptions.UsersNullParameterValueException;
 import com.example.pet_shelter.model.Users;
 import com.example.pet_shelter.repository.UsersRepository;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -22,30 +22,38 @@ public class UsersService {
     }
 
     /**
-     * <b> Добавление User в БД</b>
-     * <br> Используется метод репозитория {@link JpaRepository#save(Object)}
-     * @param user класс сущности
-     * @return Возращает сохраненного User
+     * <i>Проверка параметров пользователя, занесение пользователя в базу данных</i>
+     *
+     * @param user передает пользователя
+     * @see com.example.pet_shelter.repository.UsersRepository
+     * @see com.example.pet_shelter.model.Users
      */
-    // Метод добавление пользователя
-    public Users createUser(Users user) {
-        // Приведение в соответствие номера телефона
-        if (user.getUserPhoneNumber() != null) {
-            user.setUserPhoneNumber(matchingPhoneNumber(user.getUserPhoneNumber()));
+    public Users createUserInDb(Users user) {
+        String userNewNumber = user.getUserPhoneNumber();
+        if (user.getFirstName().isBlank() || user.getFirstName().isBlank()) {
+            throw new UsersNullParameterValueException("Имя пользователя не указано");
         }
-        if (!ValidityEmail(user.getUserEmail())) {  // Если ошибка в e-mail, то просто записывать не будем
-            user.setUserEmail(null);
+        if (user.getFirstName().isBlank() || user.getFirstName().isBlank()) {
+            throw new UsersNullParameterValueException("Фамилия пользователя не указана");
+        }
+        // Форматирование телефона пользователя, если телефон указан неверно получаем null
+        if (userNewNumber != null && MatchingPhoneNumber(userNewNumber) != null) {
+            user.setUserPhoneNumber(MatchingPhoneNumber(userNewNumber));
+        } else {
+            throw new UsersNullParameterValueException("Телефон пользователя не указан или не соответствует формату");
+        }
+        if (!ValidityEmail(user.getUserEmail())) {
+            throw new UsersNullParameterValueException("Почта пользователя не указана или не соответствует формату");
         }
         return this.usersRepository.save(user);
     }
 
     /**
-     * <b> Удаление User из БД</b>
-     * <br> Используется метод репозитория {@link JpaRepository#deleteById(Object)}
-     * @param id идентификатор пользователя, не может быть {@code null}
-     * @return Возращает сохраненного User
+     * <i>Удаляет из базы питомца по id</i>
+     *
+     * @param id Id пользователя в базе данных
+     * @see com.example.pet_shelter.repository.UsersRepository
      */
-    // Метод удаления пользователя
     public Users deleteUser(Long id) {
         Users deleteUser = usersRepository.findById(id).orElse(null);
         usersRepository.deleteById(id);
@@ -53,51 +61,58 @@ public class UsersService {
     }
 
     /**
-     * <b> Изменение User в БД</b>
-     * <br> Используется метод репозитория {@link JpaRepository#save(Object)}
-     * @param id идентификатор пользователя, не может быть {@code null}
-     * @param  user класс сущности
-     * @return Возращает измененного User
+     * <i>Заменяет старые параметры пользователя на те что были переданы.
+     * Если объект по id не найден будет выкинуто исключение UsersNullParameterValueException.
+     * При отсутсвии одного из полей у передаваемого объекта user будет выкинуто исключение NullPointerException.
+     * </i>
+     *
+     * @param id   Id пользователя в базе данных
+     * @param user объект пользователя
+     * @see com.example.pet_shelter.repository.DogsRepository
+     * @see com.example.pet_shelter.model.Users
      */
-    // Метод изменения данных о пользователе
     public Users updateUser(Long id, Users user) {
-        usersRepository.deleteById(id);
-        // Приведение в соответствие телефона в случай количества символов не равное 11 номер телефона не записываем
-        if (user.getUserPhoneNumber() != null) {
-            user.setUserPhoneNumber(matchingPhoneNumber(user.getUserPhoneNumber()));
+        Users updateUser = usersRepository.findById(id).orElse(null);
+        if (updateUser != null) {
+            updateUser.setFirstName(user.getFirstName());
+            updateUser.setLastName(user.getLastName());
+            updateUser.setUserPhoneNumber(user.getUserPhoneNumber());
+            updateUser.setUserEmail(user.getUserEmail());
+        } else {
+            throw new UsersNullParameterValueException("Недостаточно данных при попытке заменить данные у объекта users");
         }
-        if (!ValidityEmail(user.getUserEmail())) {  // Если ошибка в e-mail, то просто записывать не будем
-            user.setUserEmail(null);
-        }
-        return usersRepository.save(user);
+        return usersRepository.save(updateUser);
     }
 
     /**
-     * <b>Приведение номера телефона пользователя к шаблону</b>
-     * @param telefone строка содержащая телефон пользователя
-     * @return Возвращает телефон по заданному шаблону +7(xxx)xxx-xx-xx
+     * <i>Проверяет правильность написания номера телефона, если номер указан неверно, метод возвращает null
+     * Если номер указан верно, он подгоняется под общий формат </i>
+     *
+     * @param telefone номер телефона пользователя
+     * @see com.example.pet_shelter.repository.UsersRepository
      */
-    // Валидность номера телефона
-    public String matchingPhoneNumber(String telefone) {
-        // Проверка строки на содержание там 11 цифр
+    public String MatchingPhoneNumber(String telefone) {
         if (telefone.chars().filter(Character::isDigit).count() == 11) {
-            // Оставляем только цифры
             String str = telefone.replaceAll("\\D+", "");
-            // Формирование строки по шаблону  +7(xxx)xxx-xx-xx
-            return ("+" + str.substring(0, 1) + "(" + str.substring(1, 4) + ")" + str.substring(4, 7)
-                    + "-" + str.substring(7, 9) + "-" + str.substring(9, 11));
+            String firstCharacter = str.substring(0, 1);
+            if (firstCharacter.equals("8")) {
+                return (str.charAt(0) + "(" + str.substring(1, 4) + ")" + str.substring(4, 7)
+                        + "-" + str.substring(7, 9) + "-" + str.substring(9, 11));
+            } else {
+                return ("+" + str.charAt(0) + "(" + str.substring(1, 4) + ")" + str.substring(4, 7)
+                        + "-" + str.substring(7, 9) + "-" + str.substring(9, 11));
+            }
+        } else {
+            return null;
         }
-        return null;
     }
 
     /**
-     * <b>Приведение номера телефона пользователя к шаблону</b>
-     * * <br> Используется метод репозитория {@link UsersService#patternMatches(String, String)}
-     * где в качестве первого параметра регулярное выражение, второй - передаваемая строка для обработки
-     * @param eMail строка содержащая e-mail пользователя
-     * @return Возвращает boolean true- e-mail валидный false не валидный
+     * <i>Проверяет правильность написания электронной почты пользователя, если почта указана неверно, метод возвращает false</i>
+     *
+     * @param eMail электронная почта пользователя
+     * @see com.example.pet_shelter.repository.UsersRepository
      */
-    // Валидность e-mail
     public boolean ValidityEmail(String eMail) {
         if (eMail == null) {
             return false;
@@ -108,15 +123,16 @@ public class UsersService {
     }
 
     /**
+     * <i>Вспомогательный метод, соответствующий шаблону регулярных выражений</i>
      *
-     * @param theStringBeingChecked - входное регулярное выражение
-     * @param regexPattern - входное строковая переменная для обработки регулярным выражением
-     * @return boolean true -строка соответствует регулярному выражению, false - не соответствует
+     * @param TheStringBeingChecked строка которую нужно проверить
+     * @param regexPattern          паттерн для проверки строки
+     * @see java.util.regex.Pattern
+     * @see java.util.regex.Matcher
      */
-    // Вспомогательный метод, соответствующий шаблону регулярных выражений
-    public static boolean patternMatches(String theStringBeingChecked, String regexPattern) {
+    public static boolean patternMatches(String TheStringBeingChecked, String regexPattern) {
         return Pattern.compile(regexPattern)
-                .matcher(theStringBeingChecked)
+                .matcher(TheStringBeingChecked)
                 .matches();
     }
 

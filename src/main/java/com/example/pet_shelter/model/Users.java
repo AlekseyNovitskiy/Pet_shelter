@@ -1,7 +1,6 @@
 package com.example.pet_shelter.model;
 
 import javax.persistence.*;
-import java.util.Collection;
 
 @Entity
 @Table(name = "Users")
@@ -27,6 +26,7 @@ public class Users {
     @ManyToOne
     @JoinColumn(name = "dog_id")
     private Dogs dog;
+
 
     public Long getId() {
         return id;

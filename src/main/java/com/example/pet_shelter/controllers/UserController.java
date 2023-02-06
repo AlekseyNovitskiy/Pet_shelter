@@ -23,59 +23,112 @@ public class UserController {
         this.usersService = usersService;
     }
 
-    @Operation(summary = "Получение всех пользователей",
-            responses = {@ApiResponse(
-                    responseCode = "200",
-                    description = "Информация о Users найдена",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
-                    ))},tags = "USER")
-    // Получение всех пользователей
+    @Operation(
+            summary = "Получение всех пользователей",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Список пользователей",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    array = @ArraySchema(schema = @Schema(implementation = Users.class))
+                            )
+                    )
+            }
+    )
     @GetMapping("/getALL")
     public Collection<Users> getAllUsers() {
         return this.usersService.getAllUsers();
     }
 
-
-    @Operation(summary = "Внесение данных о новой пользователе",
-            responses = {@ApiResponse(
-                    responseCode = "200",
-                    description = "Информация о User занесена",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = Users.class))
-                    ))},tags = "USER")
-    // Добавление данных о новом пользователе
+    @Operation(
+            summary = "Внесение данных о новой пользователе",
+            description = "Внесение полных данных пользователя в определённом формате",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Вернёт объект пользователя с данными, которые он внёс",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = Users.class)
+                            )),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Ошибка со стороны сервиса(Так же при неполных данных пользователя)"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Ошибка при внесении пользователя в базу из-за неверного формата данных"
+                    )
+            })
     @PostMapping("/create")
-    public Users createUser(@RequestBody Users user) {
-        return this.usersService.createUser(user);
+    public Users createUserInDb(@Parameter(
+            description = "Полные данные пользователя",
+            example = "{firstName: Name, lastName : LastName, userPhoneNumber : +75558804420, userEmail: mail@mail.ru}")
+                            @RequestBody Users user) {
+        return this.usersService.createUserInDb(user);
     }
 
-    @Operation(summary = "Удаление данных о пользователе",
-            responses = {@ApiResponse(
-                    responseCode = "200",
-                    description = "Информация о User удалена",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
-                    ))},tags = "USER")
-    // Удаление данных о пользователе
+    @Operation(
+            summary = "Удаление данных о пользователе",
+            description = "Удаляет пользователя по id",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Вернёт объект пользователя по указанному id, предварительно удалив его из базы",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = Users.class)
+                            )),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Пользователь не найден в базе"
+                    )
+            })
     @DeleteMapping("/delete/{id}")
-    public Users deleteDog(@Parameter(description = "Id User", example = "1") @PathVariable("id") Long id) {
+    public Users deleteDog(@Parameter(
+            description = "Id пользователя, которого необходимо удалить",
+            example = "1")
+                           @PathVariable("id") Long id) {
         return this.usersService.deleteUser(id);
     }
 
+    @Operation(
+            summary = "Изменение данных о пользователе о собаке пользователя",
+            description = "Удаляет собаку пользователя по Id собаки")
+    @PutMapping("/update/dog/{id}")
+    public Users deleteDog(@Parameter(
+            description = "Id собаки(?), которую нужно удалить",
+            example = "1")
+                           @PathVariable("id") Long id, @RequestBody Users user) {
+        return this.usersService.updateUser(id, user);
+    }
 
-    @Operation(summary = "Изменение данных о пользователе",
-            responses = {@ApiResponse(
-                    responseCode = "200",
-                    description = "Информация о User изменена",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = Users.class))
-                    ))},tags = "USER")
-    // Изменение данных о пользователе
+    @Operation(
+            summary = "Изменение данных о пользователе",
+            description = "Ищет пользователя по id, затем заменяет в нем данные на те, что записаны в передаваемом user."
+                    + " Если в одном из параметров у dog указана пустая строка этот параметр не будет изменён.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Вернёт объект users с обновленными данными",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = Users.class)
+                            )),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Недостаточно данных для обновления объекта users или объект с таким id не найден"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Ошибка при обновлении объекта users из-за неверного формата данных"
+                    )}
+    )
     @PutMapping("/update/{id}")
-    public Users deleteDog(@Parameter(description = "Id User", example = "1") @PathVariable("id") Long id, @RequestBody Users user) {
+    public Users updateUsers(@Parameter(
+            description = "Id пользователя",
+            example = "1") @PathVariable("id") Long id,
+                             @Parameter(
+                                     description = "Полные данные пользователя",
+                                     example = "{firstName: Name, lastName : LastName, userPhoneNumber : +75558804420, userEmail: mail@mail.ru}")
+                             @RequestBody Users user) {
         return this.usersService.updateUser(id, user);
     }
 
