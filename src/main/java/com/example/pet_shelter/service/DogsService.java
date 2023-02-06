@@ -22,13 +22,14 @@ public class DogsService {
     }
 
     /**
-     * <i>Заносит в базу созданный объект питомца</i>
+     * <i>Заносит в базу созданный объект питомца.
+     * Если объект пуст будует выкинуто исключение DogNullParameterValueException.</i>
      *
-     * @param dog
-     * @return
+     * @param dog объект питомца
+     * @see com.example.pet_shelter.repository.DogsRepository
      */
-    public Dogs createDog(Dogs dog) {
-        if (dog.getNickname().isBlank() || dog.getNickname().isBlank()) {
+    public Dogs createDogInDB(Dogs dog) {
+        if (dog.getNickname().isBlank() || dog.getNickname().isEmpty()) {
             throw new DogNullParameterValueException("Кличка питомца не указана");
         }
         return dogsRepository.save(dog);
@@ -37,8 +38,8 @@ public class DogsService {
     /**
      * <i>Удаляет из базы питомца по id</i>
      *
-     * @param id
-     * @return
+     * @param id Id питомца в базе данных
+     * @see com.example.pet_shelter.repository.DogsRepository
      */
     public Dogs deleteDog(Long id) {
         Dogs deleteDog = dogsRepository.findById(id).orElse(null);
@@ -47,21 +48,21 @@ public class DogsService {
     }
 
     /**
-     * <i>Заменяет старые параметры питомца на переданные.
+     * <i>Заменяет старые параметры питомца на те что были переданы.
      * Если объект по id не найден будет выкинуто исключение DogNullParameterValueException.
      * При отсутсвии одного из полей у передаваемого объекта dog будет выкинуто исключение NullPointerException.
      * </i>
      *
-     * @param id
-     * @param dog
-     * @return
+     * @param id  Id питомца в базе данных
+     * @param dog объект питомца
+     * @see com.example.pet_shelter.repository.DogsRepository
      */
     public Dogs updateDog(Long id, Dogs dog) {
         Dogs updateDog = dogsRepository.findById(id).orElse(null);
         if (updateDog != null) {
-                updateDog.setNickname(dog.getNickname());
-                updateDog.setAge(dog.getAge());
-                updateDog.setInfoDog(dog.getInfoDog());
+            updateDog.setNickname(dog.getNickname());
+            updateDog.setAge(dog.getAge());
+            updateDog.setInfoDog(dog.getInfoDog());
         } else {
             throw new DogNullParameterValueException("Недостаточно данных при попытке заменить данные у объекта dogs");
         }

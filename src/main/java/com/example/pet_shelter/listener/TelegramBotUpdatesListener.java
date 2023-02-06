@@ -37,7 +37,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         this.menuMaker = menuMaker;
     }
 
-    private Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
+    private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
     private boolean isWaitingUserData; //ожидаем сообщение с данными пользователя после нажатия кнопки "записать данные пользователя"
     private boolean isProcess; //ожидаем поочередно загрузку фотографии и сообщения о состоянии
@@ -101,7 +101,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
             if (data.equals(MenuDescription.WRITECONTACS.name())) {
                 isWaitingUserData = true;
-                telegramBot.execute(new SendMessage(chatId, "Введите данные пользователя в формате \"Имя Фамилия Мэйл Телефон (через пробел)\"  "));
+                telegramBot.execute(new SendMessage(chatId,
+                        "Введите данные пользователя в формате \"Имя Фамилия Телефон Почта (через пробел)\""));
             } else if (data.equals(MenuDescription.AboutPetShelter.name())) {
                 AboutTheNursery(chatId);
             } else if (data.equals(MenuDescription.SCHEDULE.name())) {
@@ -197,7 +198,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 telegramBot.execute(new SendMessage(chatId, "Данные успешно записаны"));
                 isWaitingUserData = false;
             } catch (UsersNullParameterValueException e) {
-                telegramBot.execute(new SendMessage(chatId, "Не удается распознать данные, попробуйте еще раз  " + e.getMessage()));
+                telegramBot.execute(new SendMessage(chatId, "Не удается распознать данные: " + e.getMessage() + ", попробуйте еще раз."));
             }
         } else if (isPhoto) {
             try {
@@ -309,16 +310,21 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.execute(new SendDocument(chatId, file));
     }
 
-    // Добавление нового пользователя полученного в Telegram Bot
+    /**
+     * <i>Добавление нового пользователя, полученного через Telegram Bot</i>
+     *
+     * @param chatId идентификатор чата
+     * @param str    строка с данными пользователя в формате "Имя, Фамилия, Телефон, Почта"
+     * @see com.example.pet_shelter.service.UsersService
+     */
     public void createUser(Long chatId, String str) {
-
-        String[] strDivided = str.split(" "); // Разбивка строки данных пользователя
+        String[] strDivided = str.split("\\s*(\\s|,|!|\\.)\\s*"); // Разбивка строки данных пользователя
         Users user = new Users();
-        user.setFirstName(strDivided[0]);
+        user.setFirstName(strDivided[0]); // Если нет данных вылезает исключение ArrayIndexOutOfBoundsException
         user.setLastName(strDivided[1]);
         user.setUserPhoneNumber(strDivided[2]);
         user.setUserEmail(strDivided[3]);
-        usersService.createUser(user);
+        usersService.createUserInDb(user);
     }
 
     public void downloadPhotoFromChat(Update update) throws IOException {

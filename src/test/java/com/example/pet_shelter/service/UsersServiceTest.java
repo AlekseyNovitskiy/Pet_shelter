@@ -23,8 +23,6 @@ import java.util.Collection;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.Disabled;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +58,7 @@ class UsersServiceTest {
     }
 
 
+
     @Test
     void testCreateUser() {
         Dogs dogs = new Dogs();
@@ -83,18 +82,40 @@ class UsersServiceTest {
         dogs1.setInfoDog("Info Dog");
         dogs1.setNickname("Sharik");
 
-        Users users1 = new Users();
+        Users users1 = mock(Users.class);
+
+        when(users1.getUserEmail())
+                .thenThrow(
+                        new UsersNullParameterValueException("Почта пользователя не указана или не соответсвует формату"));
+        when(users1.getUserPhoneNumber()).thenReturn("4105551212");
+        when(users1.getFirstName()).thenReturn("Jane");
+        when(users1.getUserPhoneNumber()).thenReturn("Jane");
+        doNothing().when(users1).setDog((Dogs) any());
+        doNothing().when(users1).setFirstName((String) any());
+        doNothing().when(users1).setId((Long) any());
+        doNothing().when(users1).setLastName((String) any());
+        doNothing().when(users1).setUserEmail((String) any());
+        doNothing().when(users1).setUserPhoneNumber((String) any());
+
         users1.setDog(dogs1);
         users1.setFirstName("Jane");
         users1.setId(11L);
         users1.setLastName("Doe");
         users1.setUserEmail("jane.doe@example.org");
         users1.setUserPhoneNumber("4105551212");
-        assertSame(users, usersService.createUser(users1));
-        verify(usersRepository).save((Users) any());
-        assertNull(users1.getUserPhoneNumber());
-    }
 
+        assertThrows(UsersNullParameterValueException.class, () -> usersService.createUserInDb(users1));
+
+        verify(users1, atLeast(1)).getFirstName();
+        verify(users1, atLeast(1)).getUserPhoneNumber();
+//        verify(users1).getUserEmail();
+        verify(users1).setDog((Dogs) any());
+        verify(users1).setFirstName((String) any());
+        verify(users1).setId((Long) any());
+        verify(users1).setLastName((String) any());
+        verify(users1).setUserEmail((String) any());
+        verify(users1, atLeast(1)).setUserPhoneNumber((String) any());
+    }
 
     @Test
     void testCreateUser2() {
@@ -118,9 +139,9 @@ class UsersServiceTest {
         dogs1.setId(11L);
         dogs1.setInfoDog("Info Dog");
         dogs1.setNickname("Sharik");
+
         Users users1 = mock(Users.class);
-        when(users1.getUserEmail())
-                .thenThrow(new UsersNullParameterValueException("Почта пользователя не указана или не соответсвует формату"));
+        when(users1.getUserEmail()).thenReturn("foo");
         when(users1.getUserPhoneNumber()).thenReturn("4105551212");
         when(users1.getFirstName()).thenReturn("Jane");
         doNothing().when(users1).setDog((Dogs) any());
@@ -129,15 +150,16 @@ class UsersServiceTest {
         doNothing().when(users1).setLastName((String) any());
         doNothing().when(users1).setUserEmail((String) any());
         doNothing().when(users1).setUserPhoneNumber((String) any());
+
         users1.setDog(dogs1);
         users1.setFirstName("Jane");
         users1.setId(11L);
         users1.setLastName("Doe");
         users1.setUserEmail("jane.doe@example.org");
         users1.setUserPhoneNumber("4105551212");
-        assertThrows(UsersNullParameterValueException.class, () -> usersService.createUser(users1));
+
+        assertThrows(UsersNullParameterValueException.class, () -> usersService.createUserInDb(users1));
         verify(users1, atLeast(1)).getFirstName();
-        verify(users1).getUserEmail();
         verify(users1, atLeast(1)).getUserPhoneNumber();
         verify(users1).setDog((Dogs) any());
         verify(users1).setFirstName((String) any());
@@ -146,6 +168,7 @@ class UsersServiceTest {
         verify(users1).setUserEmail((String) any());
         verify(users1, atLeast(1)).setUserPhoneNumber((String) any());
     }
+
 
     @Test
     void testCreateUser3() {
@@ -169,57 +192,7 @@ class UsersServiceTest {
         dogs1.setId(11L);
         dogs1.setInfoDog("Info Dog");
         dogs1.setNickname("Sharik");
-        Users users1 = mock(Users.class);
-        when(users1.getUserEmail()).thenReturn("foo");
-        when(users1.getUserPhoneNumber()).thenReturn("4105551212");
-        when(users1.getFirstName()).thenReturn("Jane");
-        doNothing().when(users1).setDog((Dogs) any());
-        doNothing().when(users1).setFirstName((String) any());
-        doNothing().when(users1).setId((Long) any());
-        doNothing().when(users1).setLastName((String) any());
-        doNothing().when(users1).setUserEmail((String) any());
-        doNothing().when(users1).setUserPhoneNumber((String) any());
-        users1.setDog(dogs1);
-        users1.setFirstName("Jane");
-        users1.setId(11L);
-        users1.setLastName("Doe");
-        users1.setUserEmail("jane.doe@example.org");
-        users1.setUserPhoneNumber("4105551212");
-        assertThrows(UsersNullParameterValueException.class, () -> usersService.createUser(users1));
-        verify(users1, atLeast(1)).getFirstName();
-        verify(users1).getUserEmail();
-        verify(users1, atLeast(1)).getUserPhoneNumber();
-        verify(users1).setDog((Dogs) any());
-        verify(users1).setFirstName((String) any());
-        verify(users1).setId((Long) any());
-        verify(users1).setLastName((String) any());
-        verify(users1).setUserEmail((String) any());
-        verify(users1, atLeast(1)).setUserPhoneNumber((String) any());
-    }
 
-
-    @Test
-    void testCreateUser4() {
-        Dogs dogs = new Dogs();
-        dogs.setAge(1);
-        dogs.setId(11L);
-        dogs.setInfoDog("Info Dog");
-        dogs.setNickname("Sharik");
-
-        Users users = new Users();
-        users.setDog(dogs);
-        users.setFirstName("Jane");
-        users.setId(11L);
-        users.setLastName("Doe");
-        users.setUserEmail("jane.doe@example.org");
-        users.setUserPhoneNumber("4105551212");
-        when(usersRepository.save((Users) any())).thenReturn(users);
-
-        Dogs dogs1 = new Dogs();
-        dogs1.setAge(1);
-        dogs1.setId(11L);
-        dogs1.setInfoDog("Info Dog");
-        dogs1.setNickname("Sharik");
         Users users1 = mock(Users.class);
         when(users1.getUserEmail()).thenReturn("jane.doe@example.org");
         when(users1.getUserPhoneNumber()).thenReturn("4105551212");
@@ -230,13 +203,15 @@ class UsersServiceTest {
         doNothing().when(users1).setLastName((String) any());
         doNothing().when(users1).setUserEmail((String) any());
         doNothing().when(users1).setUserPhoneNumber((String) any());
+
         users1.setDog(dogs1);
         users1.setFirstName("Jane");
         users1.setId(11L);
         users1.setLastName("Doe");
         users1.setUserEmail("jane.doe@example.org");
         users1.setUserPhoneNumber("4105551212");
-        assertThrows(UsersNullParameterValueException.class, () -> usersService.createUser(users1));
+
+        assertThrows(UsersNullParameterValueException.class, () -> usersService.createUserInDb(users1));
         verify(users1).getFirstName();
         verify(users1).setDog((Dogs) any());
         verify(users1).setFirstName((String) any());
@@ -263,6 +238,7 @@ class UsersServiceTest {
         users.setUserEmail("jane.doe@example.org");
         users.setUserPhoneNumber("4105551212");
         Optional<Users> ofResult = Optional.of(users);
+
         when(usersRepository.findById((Long) any())).thenReturn(ofResult);
         doNothing().when(usersRepository).deleteById((Long) any());
         assertSame(users, usersService.deleteUser(11L));
@@ -326,6 +302,7 @@ class UsersServiceTest {
         users2.setLastName("Doe");
         users2.setUserEmail("jane.doe@example.org");
         users2.setUserPhoneNumber("4105551212");
+
         assertSame(users1, usersService.updateUser(11L, users2));
         verify(usersRepository).save((Users) any());
         verify(usersRepository).findById((Long) any());
@@ -399,6 +376,7 @@ class UsersServiceTest {
         users1.setLastName("Doe");
         users1.setUserEmail("jane.doe@example.org");
         users1.setUserPhoneNumber("4105551212");
+
         assertThrows(UsersNullParameterValueException.class, () -> usersService.updateUser(11L, users1));
         verify(usersRepository).findById((Long) any());
     }

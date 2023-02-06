@@ -23,12 +23,10 @@ import java.util.Collection;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
 class DogControllerTest {
 
@@ -83,7 +81,7 @@ class DogControllerTest {
     }
 
     @Test
-    void testCreateDog3() {
+    void testCreateDog2() {
 
         Dogs dogs = new Dogs();
         dogs.setAge(1);
@@ -91,9 +89,10 @@ class DogControllerTest {
         dogs.setInfoDog("Info Dog");
         dogs.setNickname("Sharik");
         DogsService dogsService = mock(DogsService.class);
-        when(dogsService.createDog((Dogs) any())).thenReturn(dogs);
+        when(dogsService.createDogInDB((Dogs) any())).thenReturn(dogs);
         DogController dogController = new DogController(dogsService,
-                new DogsFotoService(mock(DogsRepository.class), mock(DogsFotoRepository.class)));
+                new DogsFotoService(mock(DogsRepository.class),
+                        mock(DogsFotoRepository.class)));
 
         Dogs dogs1 = new Dogs();
         dogs1.setAge(1);
@@ -101,31 +100,35 @@ class DogControllerTest {
         dogs1.setInfoDog("Info Dog");
         dogs1.setNickname("Sharik");
         assertSame(dogs, dogController.createDog(dogs1));
-        verify(dogsService).createDog((Dogs) any());
+        verify(dogsService).createDogInDB((Dogs) any());
     }
 
 
     @Test
     void testDeleteDog() {
-
         Dogs dogs = new Dogs();
         dogs.setAge(1);
         dogs.setId(11L);
         dogs.setInfoDog("Info Dog");
         dogs.setNickname("Sharik");
+
         DogsRepository dogsRepository = mock(DogsRepository.class);
         when(dogsRepository.findById((Long) any())).thenReturn(Optional.of(dogs));
         doNothing().when(dogsRepository).deleteById((Long) any());
         DogsService dogsService = new DogsService(dogsRepository);
-        assertSame(dogs, (new DogController(dogsService,
-                new DogsFotoService(mock(DogsRepository.class), mock(DogsFotoRepository.class)))).deleteDog(11L));
+        assertSame(dogs, (
+                new DogController(dogsService,
+                        new DogsFotoService(mock(DogsRepository.class),
+                                mock(DogsFotoRepository.class)))).
+                deleteDog(11L));
+
         verify(dogsRepository).findById((Long) any());
         verify(dogsRepository).deleteById((Long) any());
     }
 
     @Test
-    void testDeleteDog3() {
-   Dogs dogs = new Dogs();
+    void testDeleteDog2() {
+        Dogs dogs = new Dogs();
         dogs.setAge(1);
         dogs.setId(11L);
         dogs.setInfoDog("Info Dog");
@@ -169,7 +172,7 @@ class DogControllerTest {
     }
 
     @Test
-    void testUpdateDog3() {
+    void testUpdateDog2() {
 
         Dogs dogs = new Dogs();
         dogs.setAge(1);
@@ -178,6 +181,7 @@ class DogControllerTest {
         dogs.setNickname("Sharik");
         DogsService dogsService = mock(DogsService.class);
         when(dogsService.updateDog((Long) any(), (Dogs) any())).thenReturn(dogs);
+
         DogController dogController = new DogController(dogsService,
                 new DogsFotoService(mock(DogsRepository.class), mock(DogsFotoRepository.class)));
 
@@ -186,6 +190,7 @@ class DogControllerTest {
         dogs1.setId(11L);
         dogs1.setInfoDog("Info Dog");
         dogs1.setNickname("Sharik");
+
         assertSame(dogs, dogController.updateDog(11L, dogs1));
         verify(dogsService).updateDog((Long) any(), (Dogs) any());
     }

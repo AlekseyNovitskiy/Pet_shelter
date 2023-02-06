@@ -1,8 +1,6 @@
 package com.example.pet_shelter.service;
 
-import com.example.pet_shelter.exceptions.DogNullParameterValueException;
 import com.example.pet_shelter.exceptions.UsersNullParameterValueException;
-import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.model.Users;
 import com.example.pet_shelter.repository.UsersRepository;
 import org.springframework.stereotype.Service;
@@ -23,8 +21,15 @@ public class UsersService {
         return this.usersRepository.findAll();
     }
 
-    // Метод добавление пользователя
-    public Users createUser(Users user) {
+    /**
+     * <i>Проверка параметров пользователя, занесение пользователя в базу данных</i>
+     *
+     * @param user передает пользователя
+     * @see com.example.pet_shelter.repository.UsersRepository
+     * @see com.example.pet_shelter.model.Users
+     */
+    public Users createUserInDb(Users user) {
+        String userNewNumber = user.getUserPhoneNumber();
         if (user.getFirstName().isBlank() || user.getFirstName().isBlank()) {
             throw new UsersNullParameterValueException("Имя пользователя не указано");
         }
@@ -32,8 +37,8 @@ public class UsersService {
             throw new UsersNullParameterValueException("Фамилия пользователя не указана");
         }
         // Форматирование телефона пользователя, если телефон указан неверно получаем null
-        if (user.getUserPhoneNumber() != null) {
-            user.setUserPhoneNumber(MatchingPhoneNumber(user.getUserPhoneNumber()));
+        if (userNewNumber != null && MatchingPhoneNumber(userNewNumber) != null) {
+            user.setUserPhoneNumber(MatchingPhoneNumber(userNewNumber));
         } else {
             throw new UsersNullParameterValueException("Телефон пользователя не указан или не соответствует формату");
         }
@@ -43,14 +48,29 @@ public class UsersService {
         return this.usersRepository.save(user);
     }
 
-    // Метод удаления пользователя
+    /**
+     * <i>Удаляет из базы питомца по id</i>
+     *
+     * @param id Id пользователя в базе данных
+     * @see com.example.pet_shelter.repository.UsersRepository
+     */
     public Users deleteUser(Long id) {
         Users deleteUser = usersRepository.findById(id).orElse(null);
         usersRepository.deleteById(id);
         return deleteUser;
     }
 
-    // Метод изменения данных о пользователе
+    /**
+     * <i>Заменяет старые параметры пользователя на те что были переданы.
+     * Если объект по id не найден будет выкинуто исключение UsersNullParameterValueException.
+     * При отсутсвии одного из полей у передаваемого объекта user будет выкинуто исключение NullPointerException.
+     * </i>
+     *
+     * @param id   Id пользователя в базе данных
+     * @param user объект пользователя
+     * @see com.example.pet_shelter.repository.DogsRepository
+     * @see com.example.pet_shelter.model.Users
+     */
     public Users updateUser(Long id, Users user) {
         Users updateUser = usersRepository.findById(id).orElse(null);
         if (updateUser != null) {
@@ -64,27 +84,52 @@ public class UsersService {
         return usersRepository.save(updateUser);
     }
 
-    // Валидность номера телефона
+    /**
+     * <i>Проверяет правильность написания номера телефона, если номер указан неверно, метод возвращает null
+     * Если номер указан верно, он подгоняется под общий формат </i>
+     *
+     * @param telefone номер телефона пользователя
+     * @see com.example.pet_shelter.repository.UsersRepository
+     */
     public String MatchingPhoneNumber(String telefone) {
         if (telefone.chars().filter(Character::isDigit).count() == 11) {
             String str = telefone.replaceAll("\\D+", "");
-            return ("+" + str.substring(0, 1) + "(" + str.substring(1, 4) + ")" + str.substring(4, 7)
-                    + "-" + str.substring(7, 9) + "-" + str.substring(9, 11));
+            String firstCharacter = str.substring(0, 1);
+            if (firstCharacter.equals("8")) {
+                return (str.charAt(0) + "(" + str.substring(1, 4) + ")" + str.substring(4, 7)
+                        + "-" + str.substring(7, 9) + "-" + str.substring(9, 11));
+            } else {
+                return ("+" + str.charAt(0) + "(" + str.substring(1, 4) + ")" + str.substring(4, 7)
+                        + "-" + str.substring(7, 9) + "-" + str.substring(9, 11));
+            }
+        } else {
+            return null;
         }
-        return null;
     }
 
-    // Валидность e-mail
+    /**
+     * <i>Проверяет правильность написания электронной почты пользователя, если почта указана неверно, метод возвращает false</i>
+     *
+     * @param eMail электронная почта пользователя
+     * @see com.example.pet_shelter.repository.UsersRepository
+     */
     public boolean ValidityEmail(String eMail) {
         if (eMail == null) {
             return false;
         } else {
-            String regexPattern = "^[A-Za-z0-9+_.-]+@(.+)$"; // В базе будет null
+            String regexPattern = "^[A-Za-z0-9+_.-]+@(.+)$";
             return patternMatches(eMail, regexPattern);
         }
     }
 
-    // Вспомогательный метод, соответствующий шаблону регулярных выражений
+    /**
+     * <i>Вспомогательный метод, соответствующий шаблону регулярных выражений</i>
+     *
+     * @param TheStringBeingChecked строка которую нужно проверить
+     * @param regexPattern          паттерн для проверки строки
+     * @see java.util.regex.Pattern
+     * @see java.util.regex.Matcher
+     */
     public static boolean patternMatches(String TheStringBeingChecked, String regexPattern) {
         return Pattern.compile(regexPattern)
                 .matcher(TheStringBeingChecked)

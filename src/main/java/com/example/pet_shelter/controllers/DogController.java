@@ -2,7 +2,6 @@ package com.example.pet_shelter.controllers;
 
 import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.model.DogsFoto;
-import com.example.pet_shelter.model.Users;
 import com.example.pet_shelter.service.DogsFotoService;
 import com.example.pet_shelter.service.DogsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -73,12 +72,12 @@ public class DogController {
                             description = "Ошибка при внесении питомца в базу из-за неверного формата данных"
                     )}
     )
-    @PostMapping("/create")   // Создание новой записи о собаке
+    @PostMapping("/create")
     public Dogs createDog(@Parameter(
             description = "Полные данные питомца",
             example = " {nick_name: 'Name', age : 5, info_dog : 'Описание привычек собаки'")
                           @RequestBody Dogs dog) {
-        return this.dogsService.createDog(dog);
+        return this.dogsService.createDogInDB(dog);
     }
 
     @Operation(
