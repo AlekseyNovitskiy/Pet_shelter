@@ -5,10 +5,8 @@ import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.model.DogsFoto;
 import com.example.pet_shelter.repository.DogsFotoRepository;
 import com.example.pet_shelter.repository.DogsRepository;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -17,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
@@ -42,6 +39,7 @@ public class DogsFotoService {
      * <br> Используется метод репозитория {@link JpaRepository#findById(Object)}
      * <br> Используется метод репозитория {@link JpaRepository#save(Object)}
      * <br> Используется метод репозитория {@link DogsFotoService#getExtensions(String)}
+     *
      * @param id   идентификатор питомца
      * @param file считываемый файл
      * @throws IOException - может возникнуть исключение ввода/вывода
@@ -74,7 +72,9 @@ public class DogsFotoService {
         dogsFotoRepository.save(dogsFoto);
     }
 
-    /** <b> Формирует имя файла </b>
+    /**
+     * <b> Формирует имя файла </b>
+     *
      * @return Возвращает имя файла
      */
     private String getExtensions(String fileName) {
@@ -90,6 +90,7 @@ public class DogsFotoService {
     /**
      * <b>Поиск питомца по его id идентификатору</b>
      * <br> Используется метод репозитория {@link JpaRepository#findById(Object)}
+     *
      * @param dogId идентификатор питомца
      * @return Возвращает найденного питомца
      */
@@ -106,6 +107,7 @@ public class DogsFotoService {
     /**
      * <b>Поиск фото собаки по id идентификатору питомца</b>
      * <br> Используется метод репозитория {@link JpaRepository#findById(Object)}
+     *
      * @param dogId идентификатор питомца
      * @return Возвращает объект фото
      * @throws IOException - может возникнуть исключение ввода/вывода
