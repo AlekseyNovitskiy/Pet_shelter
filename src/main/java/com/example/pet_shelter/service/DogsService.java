@@ -1,8 +1,11 @@
 package com.example.pet_shelter.service;
 
 import com.example.pet_shelter.exceptions.DogNullParameterValueException;
+import com.example.pet_shelter.listener.TelegramBotUpdatesListener;
 import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.repository.DogsRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -10,6 +13,8 @@ import java.util.Collection;
 
 @Service
 public class DogsService {
+
+    private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
     private final DogsRepository dogsRepository;
 
@@ -29,6 +34,12 @@ public class DogsService {
      * @see com.example.pet_shelter.repository.DogsRepository
      */
     public Dogs createDogInDB(Dogs dog) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         if (dog.getNickname().isBlank() || dog.getNickname().isEmpty()) {
             throw new DogNullParameterValueException("Кличка питомца не указана");
         }
@@ -42,6 +53,12 @@ public class DogsService {
      * @see com.example.pet_shelter.repository.DogsRepository
      */
     public Dogs deleteDog(Long id) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         Dogs deleteDog = dogsRepository.findById(id).orElse(null);
         dogsRepository.deleteById(id);
         return deleteDog;
@@ -58,6 +75,12 @@ public class DogsService {
      * @see com.example.pet_shelter.repository.DogsRepository
      */
     public Dogs updateDog(Long id, Dogs dog) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         Dogs updateDog = dogsRepository.findById(id).orElse(null);
         if (updateDog != null) {
             updateDog.setNickname(dog.getNickname());

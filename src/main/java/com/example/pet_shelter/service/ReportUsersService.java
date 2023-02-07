@@ -1,13 +1,15 @@
 package com.example.pet_shelter.service;
 
+import com.example.pet_shelter.exceptions.DogNullParameterValueException;
+import com.example.pet_shelter.listener.TelegramBotUpdatesListener;
 import com.example.pet_shelter.model.BinaryContentFile;
-import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.model.ReportUsers;
 import com.example.pet_shelter.repository.BinaryContentFileRepository;
 import com.example.pet_shelter.repository.ReportUsersRepository;
-
 import com.pengrad.telegrambot.model.Update;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 @Service
 public class ReportUsersService {
 
+    private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
+
     @Value("${telegram.bot.token}")
     private String token;                   // Ключ telegram bot
 
@@ -33,6 +37,12 @@ public class ReportUsersService {
     }
 
     public void uploadReportUser(Update update) throws IOException {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         String file_id = update.message().photo()[update.message().photo().length - 1].fileId();
         URL url = new URL("https://api.telegram.org/bot" + token + "/getFile?file_id=" + file_id);
         BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -65,11 +75,41 @@ public class ReportUsersService {
     /**
      * <b>Поиск отчета по его id идентификатору</b>
      * <br> Используется метод репозитория {@link JpaRepository#findById(Object)}
+     *
      * @param id идентификатор отчета
      * @return Возвращает найденый отчет
      */
     public ReportUsers findReportUsers(Long id) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         return reportUsersRepository.findById(id).orElseThrow();
+    }
+
+
+    public ReportUsers updateReport(Long id, ReportUsers reportUsers) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
+        ReportUsers updateReportUsers = reportUsersRepository.findById(id).orElse(null);
+        if (updateReportUsers != null) {
+            updateReportUsers.setCommentsUser(reportUsers.getCommentsUser());
+            updateReportUsers.setTime(reportUsers.getTime());
+            updateReportUsers.setFilePath(reportUsers.getFilePath());
+            updateReportUsers.setChatId(reportUsers.getChatId());
+            updateReportUsers.setFileSize(reportUsers.getFileSize());
+            updateReportUsers.setBinaryContentFile(reportUsers.getBinaryContentFile());
+
+        } else {
+            throw new DogNullParameterValueException("Недостаточно данных при попытке заменить данные у объекта Report");
+        }
+        return reportUsersRepository.save(updateReportUsers);
     }
 
 }
