@@ -1,8 +1,7 @@
 package com.example.pet_shelter.configuration;
 
-
 public enum MenuDescription {
-    AboutPetShelter,
+    AboutPetShelterDocx,
     SCHEDULE,
     SAFETYRULES,
     WRITECONTACS,
@@ -10,5 +9,11 @@ public enum MenuDescription {
 
     CYNOLOGISTADVICE,
 
-    MENULISTOFDOCUMENTS
+    MENULISTOFDOCUMENTS,
+    CATSHELTERENTER,
+    DOGSHELTERENTER,
+    AboutPetShelter,
+    HOWTOTAKEDOG,
+
+    SENDDOGPHOTO
 }

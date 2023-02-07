@@ -89,9 +89,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     }
                     if (update.callbackQuery() != null) {
                         Long chatId = update.callbackQuery().message().chat().id();
+                        startMenuDogs(chatId,update);
                         callBackUpdateMenu1(chatId, update);
                         callBackUpdateMenu2(chatId, update);
-                        callBackUpdateMenu3(chatId, update);
+//                        callBackUpdateMenu3(chatId, update);
                         callBackDataListOfRecommendations(chatId, update);
                     }
                 });
@@ -116,7 +117,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 isWaitingUserData = true;
                 telegramBot.execute(new SendMessage(chatId,
                         "Введите данные пользователя в формате \"Имя Фамилия Телефон Почта (через пробел)\""));
-            } else if (data.equals(MenuDescription.AboutPetShelter.name())) {
+            } else if (data.equals(MenuDescription.AboutPetShelterDocx.name())) {
                 AboutTheNursery(chatId);
             } else if (data.equals(MenuDescription.SCHEDULE.name())) {
                 sendLocationPhoto(chatId);
@@ -139,14 +140,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
             if (data.equals(MenuDescription.MENULISTOFDOCUMENTS.name())) {
-                telegramBot.execute(new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.inlineButtonsListOfRules(chatId)));
+                telegramBot.execute(new SendMessage(chatId, "Список документов").replyMarkup(menuMaker.inlineButtonsListOfRules(chatId)));
             } else if (data.equals(MenuDescription.CYNOLOGISTADVICE.name())) {
-                telegramBot.execute(new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.buttonCynologist(chatId))
+                telegramBot.execute(new SendMessage(chatId, "Ознакомьтесь с правилам обращения с собакой или выберите кинолога:").replyMarkup(menuMaker.buttonCynologist(chatId))
                 );
             } else if (data.equals(MenuDescription.WRITECONTACS.name())) {
                 isWaitingUserData = true;
-            } else if (data.equals(MenuDescription.VOLUNTEERCALL.name())) {
-                telegramBot.execute(new SendMessage(chatId, "Волонтер позван"));
             }
         }
     }
@@ -169,22 +168,39 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         }
     }
 
-    /**
-     * <i>Обработка колбэков 3-го меню</i>
-     *
-     * @param chatId идентификатор чата
-     * @param update апдейт
-     * @see com.pengrad.telegrambot.model.CallbackQuery
-     * @see com.pengrad.telegrambot.model.Update
-     */
-    private void callBackUpdateMenu3(Long chatId, Update update) {
+//    /**
+//     * <i>Обработка колбэков 3-го меню</i>
+//     *
+//     * @param chatId идентификатор чата
+//     * @param update апдейт
+//     * @see com.pengrad.telegrambot.model.CallbackQuery
+//     * @see com.pengrad.telegrambot.model.Update
+//     */
+//    private void callBackUpdateMenu3(Long chatId, Update update) {
+//        CallbackQuery callbackQuery = update.callbackQuery();
+//        if (update.callbackQuery() != null) {
+//            String data = callbackQuery.data();
+//            if (data.equals("photo")) {
+//                isPhoto = true;
+//                telegramBot.execute(new SendMessage(chatId, "Загрузите фото вашего питомца  "));
+//            }
+//        }
+//    }
+
+    private void startMenuDogs(Long chatId, Update update) {
         CallbackQuery callbackQuery = update.callbackQuery();
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
-            if (data.equals("photo")) {
-                isPhoto = true;
-                telegramBot.execute(new SendMessage(chatId, "Загрузите фото вашего питомца  "));
-            }
+             if (data.equals(MenuDescription.DOGSHELTERENTER.name())) {
+                telegramBot.execute(new SendMessage(chatId,"Вы выбрали собачий приют").replyMarkup(menuMaker.afterStartDogKeyBoard()));
+            } else if (data.equals(MenuDescription.AboutPetShelter.name())) {
+                 telegramBot.execute(new SendMessage(chatId, "Вы выбрали пункт выбрать информацию о приюте").replyMarkup(menuMaker.menu1Keyboard()));
+             } else if (data.equals(MenuDescription.HOWTOTAKEDOG.name())) {
+                 telegramBot.execute(new SendMessage(chatId, "Вы выбрали пункт как взять информацию о питомце").replyMarkup(menuMaker.menu2Keyboard()));
+             } else if (data.equals(MenuDescription.SENDDOGPHOTO.name())) {
+                 telegramBot.execute(new SendMessage(chatId, "Загрузите отчет").replyMarkup(menuMaker.menu3Keyboard()));
+                 isPhoto = true;
+             }
         }
     }
 
@@ -223,25 +239,25 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         } else {
             switch (userMessage) {
                 case "/start":
-                    telegramBot.execute(new SendMessage(chatId, "Какое-то приветственное сообщение, выберите команду из меню"));
+                    telegramBot.execute(new SendMessage(chatId, "Какое-то приветственное сообщение, выберите команду из меню, Выберите приют").replyMarkup(menuMaker.startMenuKeyboard()));
                     break;
-                case "/menu1":
-                    SendMessage sendMsg = new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.menu1Keyboard());
-                    telegramBot.execute(sendMsg);
-                    break;
-                case "/menu2":
-                    greetings(chatId, update);
-                    SendMessage msg = new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.menu2Keyboard());
-                    telegramBot.execute(msg);
-                    break;
-                case "/menu3":
-                    SendMessage msg3 = new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.menu3Keyboard());
-                    telegramBot.execute(msg3);
-                    break;
-                case "/menu4":
-                    SendMessage msg4 = new SendMessage(chatId, "Волонтер идёт !");
-                    telegramBot.execute(msg4);
-                    break;
+//                case "/menu1":
+//                    SendMessage sendMsg = new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.menu1Keyboard());
+//                    telegramBot.execute(sendMsg);
+//                    break;
+//                case "/menu2":
+//                    greetings(chatId, update);
+//                    SendMessage msg = new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.menu2Keyboard());
+//                    telegramBot.execute(msg);
+//                    break;
+//                case "/menu3":
+//                    SendMessage msg3 = new SendMessage(chatId, "Please select an option:").replyMarkup(menuMaker.menu3Keyboard());
+//                    telegramBot.execute(msg3);
+//                    break;
+//                case "/menu4":
+//                    SendMessage msg4 = new SendMessage(chatId, "Волонтер идёт !");
+//                    telegramBot.execute(msg4);
+//                    break;
                 default:// TODO: добавить обработку неизвестных команд
                     telegramBot.execute(new SendMessage(chatId, "Вы ввели что-то странное!"));
             }
