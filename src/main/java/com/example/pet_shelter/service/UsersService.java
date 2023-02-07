@@ -1,8 +1,11 @@
 package com.example.pet_shelter.service;
 
 import com.example.pet_shelter.exceptions.UsersNullParameterValueException;
+import com.example.pet_shelter.listener.TelegramBotUpdatesListener;
 import com.example.pet_shelter.model.Users;
 import com.example.pet_shelter.repository.UsersRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -10,6 +13,8 @@ import java.util.regex.Pattern;
 
 @Service
 public class UsersService {
+
+    private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
     private final UsersRepository usersRepository;
 
@@ -29,6 +34,12 @@ public class UsersService {
      * @see com.example.pet_shelter.model.Users
      */
     public Users createUserInDb(Users user) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         String userNewNumber = user.getUserPhoneNumber();
         if (user.getFirstName().isBlank() || user.getFirstName().isBlank()) {
             throw new UsersNullParameterValueException("Имя пользователя не указано");
@@ -55,6 +66,12 @@ public class UsersService {
      * @see com.example.pet_shelter.repository.UsersRepository
      */
     public Users deleteUser(Long id) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         Users deleteUser = usersRepository.findById(id).orElse(null);
         usersRepository.deleteById(id);
         return deleteUser;
@@ -72,6 +89,12 @@ public class UsersService {
      * @see com.example.pet_shelter.model.Users
      */
     public Users updateUser(Long id, Users user) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         Users updateUser = usersRepository.findById(id).orElse(null);
         if (updateUser != null) {
             updateUser.setFirstName(user.getFirstName());
@@ -92,6 +115,12 @@ public class UsersService {
      * @see com.example.pet_shelter.repository.UsersRepository
      */
     public String MatchingPhoneNumber(String telefone) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         if (telefone.chars().filter(Character::isDigit).count() == 11) {
             String str = telefone.replaceAll("\\D+", "");
             String firstCharacter = str.substring(0, 1);
@@ -114,6 +143,12 @@ public class UsersService {
      * @see com.example.pet_shelter.repository.UsersRepository
      */
     public boolean ValidityEmail(String eMail) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         if (eMail == null) {
             return false;
         } else {
@@ -130,7 +165,14 @@ public class UsersService {
      * @see java.util.regex.Pattern
      * @see java.util.regex.Matcher
      */
-    public static boolean patternMatches(String TheStringBeingChecked, String regexPattern) {
+    public boolean patternMatches(String TheStringBeingChecked, String regexPattern) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
+
         return Pattern.compile(regexPattern)
                 .matcher(TheStringBeingChecked)
                 .matches();

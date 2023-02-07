@@ -1,10 +1,13 @@
 package com.example.pet_shelter.service;
 
+import com.example.pet_shelter.listener.TelegramBotUpdatesListener;
 import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.model.DogsFoto;
 import com.example.pet_shelter.repository.DogsFotoRepository;
 import com.example.pet_shelter.repository.DogsRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,6 +23,8 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
 @Service
 public class DogsFotoService {
+
+    private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
     private final DogsRepository dogsRepository;
     private final DogsFotoRepository dogsFotoRepository;
@@ -42,7 +47,12 @@ public class DogsFotoService {
      * @throws IOException - может возникнуть исключение ввода/вывода
      */
     public void uploadFotoDog(Long id, MultipartFile file) throws IOException {
-
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         Dogs dog = dogsRepository.findById(id).orElseThrow();
         Path filePath = Path.of(FotoDogsDir, id + "." + getExtensions(file.getOriginalFilename()));
         Files.createDirectories(filePath.getParent()); // Создание директории если ее нет
@@ -68,8 +78,13 @@ public class DogsFotoService {
      * @return Возвращает имя файла
      */
     private String getExtensions(String fileName) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         return fileName.substring(fileName.lastIndexOf(".") + 1);
-
     }
 
     /**
@@ -79,6 +94,12 @@ public class DogsFotoService {
      * @return Возвращает найденного питомца
      */
     public Dogs findDog(Long dogId) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         return dogsRepository.findById(dogId).orElseThrow();
     }
 
@@ -91,6 +112,12 @@ public class DogsFotoService {
      */
     // Поиск фото собаки по id
     public DogsFoto findFotoDog(Long dogId) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         return dogsFotoRepository.findById(dogId).orElseThrow();
     }
 
