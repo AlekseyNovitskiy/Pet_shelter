@@ -1,6 +1,8 @@
 package com.example.pet_shelter.model;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+
 
 @Entity
 @Table(name = "Report")
@@ -8,27 +10,17 @@ public class ReportUsers {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Long id;               // Идентификатор
-
-    @Column(name = "filepath")
-    private String filePath;       // Название файла
+    private Long id;                    // Идентификатор
 
 
-    @Column(name = "filesize")
-    private long fileSize;         // Размер файла
-
-    @Column(name = "mediatype")
-    private String MediaType;      // Тип файла
-
-    @Lob
-    private byte[] fotoDog;       // Массив для хранения фотографии
-
-    private String report;        // Текст отчета
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private Users user;
-
+    private Long chatId;                // Идентификатор чата
+    private String telegramFileId;
+    private String filePath;
+    @OneToOne
+    private BinaryContentFile binaryContentFile;
+    private long fileSize;            // Размер файла
+    private LocalDate time;           // Дата сдачи отчета
+    private String commentsUser;      // Комментарии к отчету
 
     public Long getId() {
         return id;
@@ -36,6 +28,22 @@ public class ReportUsers {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getChatId() {
+        return chatId;
+    }
+
+    public void setChatId(Long chatId) {
+        this.chatId = chatId;
+    }
+
+    public String getTelegramFileId() {
+        return telegramFileId;
+    }
+
+    public void setTelegramFileId(String telegramFileId) {
+        this.telegramFileId = telegramFileId;
     }
 
     public String getFilePath() {
@@ -46,6 +54,14 @@ public class ReportUsers {
         this.filePath = filePath;
     }
 
+    public BinaryContentFile getBinaryContentFile() {
+        return binaryContentFile;
+    }
+
+    public void setBinaryContentFile(BinaryContentFile binaryContentFile) {
+        this.binaryContentFile = binaryContentFile;
+    }
+
     public long getFileSize() {
         return fileSize;
     }
@@ -54,28 +70,19 @@ public class ReportUsers {
         this.fileSize = fileSize;
     }
 
-    public String getMediaType() {
-        return MediaType;
+    public LocalDate getTime() {
+        return time;
     }
 
-    public void setMediaType(String mediaType) {
-        MediaType = mediaType;
+    public void setTime(LocalDate time) {
+        this.time = time;
     }
 
-    public byte[] getFotoDog() {
-        return fotoDog;
+    public String getCommentsUser() {
+        return commentsUser;
     }
 
-    public void setFotoDog(byte[] fotoDog) {
-        this.fotoDog = fotoDog;
+    public void setCommentsUser(String commentsUser) {
+        this.commentsUser = commentsUser;
     }
-
-    public String getReport() {
-        return report;
-    }
-
-    public void setReport(String report) {
-        this.report = report;
-    }
-
 }

@@ -3,24 +3,42 @@ package com.example.pet_shelter.listener;
 import com.example.pet_shelter.MenuMaker.MenuMaker;
 import com.example.pet_shelter.configuration.MenuDescription;
 import com.example.pet_shelter.exceptions.UsersNullParameterValueException;
+import com.example.pet_shelter.model.BinaryContentFile;
+import com.example.pet_shelter.model.ReportUsers;
 import com.example.pet_shelter.model.Users;
+import com.example.pet_shelter.repository.BinaryContentFileRepository;
+import com.example.pet_shelter.repository.ReportUsersRepository;
+import com.example.pet_shelter.service.ReportUsersService;
 import com.example.pet_shelter.service.UsersService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.request.*;
+import com.pengrad.telegrambot.response.SendResponse;
+import org.apache.commons.io.IOUtils;
+import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
@@ -28,13 +46,20 @@ import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
+    private final ReportUsersRepository reportUsersRepository;
+    private final BinaryContentFileRepository binaryContentFileRepository;
     private final UsersService usersService;
-
     private final MenuMaker menuMaker;
+    private final ReportUsersService reportUsersService;
 
-    public TelegramBotUpdatesListener(UsersService usersService, MenuMaker menuMaker) {
+    public TelegramBotUpdatesListener(UsersService usersService, MenuMaker menuMaker, ReportUsersService reportUsersService,
+                                      BinaryContentFileRepository binaryContentFileRepository,
+                                      ReportUsersRepository reportUsersRepository) {
         this.usersService = usersService;
         this.menuMaker = menuMaker;
+        this.reportUsersService = reportUsersService;
+        this.binaryContentFileRepository = binaryContentFileRepository;
+        this.reportUsersRepository = reportUsersRepository;
     }
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
@@ -70,9 +95,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     public int process(List<Update> updates) {
         updates.stream()
                 .forEach(update -> {
+                    logger.info("Processing update: {}", update);
                     if (update.message() != null && update.message().text() != null || update.message() != null && update.message().photo() != null) {
                         Long chatId = update.message().chat().id();
-                        processUpdate(chatId, update);
+                      //  if (chatId == null || update == null) {
+                            processUpdate(chatId, update);
+                      //  }
                     }
                     if (update.callbackQuery() != null) {
                         Long chatId = update.callbackQuery().message().chat().id();
@@ -202,7 +230,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             }
         } else if (isPhoto) {
             try {
-                downloadPhotoFromChat(update);
+                reportUsersService.uploadReportUser(update); // Сохранение отчета User
                 telegramBot.execute(new SendMessage(chatId, "Изображение успешно сохранено"));
                 isPhoto = false;
             } catch (IOException e) {
@@ -327,29 +355,24 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         usersService.createUserInDb(user);
     }
 
-    public void downloadPhotoFromChat(Update update) throws IOException {
+    /**
+     * Фоновое приложение для поиска User с не сданными отчетами
+     */
+    @Scheduled(fixedDelay = 60_000L)
+    public void run() {
 
-        if (update.message() != null && update.message().photo() != null) {
+        LocalDate date = LocalDate.now().plusMonths(1);  // К текущей дате прибавляем время
 
-            String file_id = update.message().photo()[update.message().photo().length - 1].fileId();
-            URL url = new URL("https://api.telegram.org/bot" + telegramBot.getToken() + "/getFile?file_id=" + file_id);
-           // System.out.println(url);
-            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
-            String getFileResponse = br.readLine();
-            JSONObject jresult = new JSONObject(getFileResponse);
-            JSONObject path = jresult.getJSONObject("result");
-            String file_path = path.getString("file_path");
-           // System.out.println(file_path);
-            File localFile = new File("./src/main/resources/" + file_path);
+        List<ReportUsers> reportUsersList = new ArrayList<>();
+        reportUsersList = reportUsersRepository.getAllBy();
 
-            InputStream is = new URL("https://api.telegram.org/file/bot" + telegramBot.getToken() + "/" + file_path).openStream();
-            copyInputStreamToFile(is, localFile);
-            br.close();
-            is.close();
-
-
-
-
+        for (int i = 0; i < reportUsersList.size(); i++) {
+            LocalDate date1 = reportUsersList.get(i).getTime();
+            if (date.equals(date1)) {
+                long chatId = reportUsersList.get(i).getChatId();
+                String str = "Пользователь пришлите отчет о питомце";
+                SendResponse response = telegramBot.execute(new SendMessage(chatId, str));
+            }
         }
     }
 }
