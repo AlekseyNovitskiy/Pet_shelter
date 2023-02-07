@@ -15,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -90,6 +89,7 @@ public class DogController {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE
                     ))},tags = "DOG")
+
     // Загрузка фотографии собаки
     @PostMapping(value = "/{id}/load/fotoDog", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     // Прикрепление фото собаки
@@ -100,11 +100,10 @@ public class DogController {
             return ResponseEntity.badRequest().body("Файл большого размера");
         }
         dogsFotoService.uploadFotoDog(id, fotoDog);
-        return ResponseEntity.ok().
-
-                build();
+        return ResponseEntity.ok().build();
 
     }
+
     @Operation(summary = "Просмотр фотографии питомца",
             responses = {@ApiResponse(
                     responseCode = "200",
