@@ -3,7 +3,6 @@ package com.example.pet_shelter.listener;
 import com.example.pet_shelter.MenuMaker.MenuMaker;
 import com.example.pet_shelter.configuration.MenuDescription;
 import com.example.pet_shelter.exceptions.UsersNullParameterValueException;
-import com.example.pet_shelter.model.BinaryContentFile;
 import com.example.pet_shelter.model.ReportUsers;
 import com.example.pet_shelter.model.Users;
 import com.example.pet_shelter.repository.BinaryContentFileRepository;
@@ -15,33 +14,20 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.request.*;
 import com.pengrad.telegrambot.response.SendResponse;
-import org.apache.commons.io.IOUtils;
-import org.apache.tomcat.util.http.fileupload.FileItem;
-import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
-
 import javax.annotation.PostConstruct;
 import java.io.*;
 import java.io.File;
 import java.net.URI;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
@@ -65,8 +51,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
     private boolean isWaitingUserData; //ожидаем сообщение с данными пользователя после нажатия кнопки "записать данные пользователя"
-    private boolean isProcess; //ожидаем поочередно загрузку фотографии и сообщения о состоянии
-    private boolean isPhoto; //ожидаем загрузку фото
+    private boolean isProcess;         //ожидаем поочередно загрузку фотографии и сообщения о состоянии
+    private boolean isPhoto;           //ожидаем загрузку фото
 
     @Value("${nameFileAboutTheNursery}")
     String NAME_FILE_ABOUT_THE_NURSERY; // Место расположения файла информации о приюте
@@ -98,9 +84,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     logger.info("Processing update: {}", update);
                     if (update.message() != null && update.message().text() != null || update.message() != null && update.message().photo() != null) {
                         Long chatId = update.message().chat().id();
-                      //  if (chatId == null || update == null) {
                             processUpdate(chatId, update);
-                      //  }
                     }
                     if (update.callbackQuery() != null) {
                         Long chatId = update.callbackQuery().message().chat().id();
@@ -140,7 +124,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             }
         }
     }
-
 
     /**
      * <i>Обработка колбэков 2-го меню</i>
@@ -293,9 +276,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.execute(message);
     }
 
-
     // Информация о питомнике *считывание информации о питомнике и вывод в чат Bot
     private void AboutTheNursery(long chatId) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         char[] buf = new char[NUMBER_CHARACTERS_READ_FILE_ABOUT_THE_NURSERY];
         try (FileReader reader = new FileReader(NAME_FILE_ABOUT_THE_NURSERY)) {
             reader.read(buf);
@@ -313,6 +301,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * @see com.pengrad.telegrambot.request.SendPhoto
      */
     public void sendLocationPhoto(Long chatId) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         float latitude = (float) 59.82225018231752;
         float longitude = (float) 30.178212453672643;
         telegramBot.execute(new SendMessage(chatId, "Мы работаем по такому графику, наш адрес такой-то"));
@@ -333,6 +327,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * @param chatId идентификатор чата
      */
     public void sendPetsDocuments(Long chatId) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
         telegramBot.execute(new SendMessage(chatId, "Файл со списком нужных документов"));
         java.io.File file = new File("Документы, чтобы взять собаку.docx");
         telegramBot.execute(new SendDocument(chatId, file));
@@ -346,6 +346,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * @see com.example.pet_shelter.service.UsersService
      */
     public void createUser(Long chatId, String str) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
+        //  logger.info("Метод" + Object.class.getEnclosingMethod());
         String[] strDivided = str.split("\\s*(\\s|,|!|\\.)\\s*"); // Разбивка строки данных пользователя
         Users user = new Users();
         user.setFirstName(strDivided[0]); // Если нет данных вылезает исключение ArrayIndexOutOfBoundsException
@@ -360,6 +367,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      */
     @Scheduled(fixedDelay = 60_000L)
     public void run() {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
 
         LocalDate date = LocalDate.now().plusMonths(1);  // К текущей дате прибавляем время
 
@@ -370,7 +383,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             LocalDate date1 = reportUsersList.get(i).getTime();
             if (date.equals(date1)) {
                 long chatId = reportUsersList.get(i).getChatId();
-                String str = "Пользователь пришлите отчет о питомце";
+                String str = "Уважаемый владелец! пришлите отчет о питомце. Спасибо!";
                 SendResponse response = telegramBot.execute(new SendMessage(chatId, str));
             }
         }
