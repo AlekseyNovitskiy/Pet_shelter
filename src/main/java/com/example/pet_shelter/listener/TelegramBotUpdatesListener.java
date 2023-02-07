@@ -382,7 +382,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
         for (int i = 0; i < reportUsersList.size(); i++) {
             LocalDate date1 = reportUsersList.get(i).getTime();
-            Period period = Period.between(date, date1);
+            Period period = Period.between(date, date1); // Вычисление промежутка между датами
             if (date.equals(date1) || period.getDays()>31) {
                 long chatId = reportUsersList.get(i).getChatId();
                 String str = "Уважаемый владелец! пришлите отчет о питомце. Спасибо!";
