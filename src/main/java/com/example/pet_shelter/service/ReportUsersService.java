@@ -24,12 +24,11 @@ import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 
 @Service
 public class ReportUsersService {
-    TelegramBot telegramBot;
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
-
-    BinaryContentFileRepository binaryContentFileRepository;
-    ReportUsersRepository reportUsersRepository;
+    private TelegramBot telegramBot;
+    private BinaryContentFileRepository binaryContentFileRepository;
+    private ReportUsersRepository reportUsersRepository;
 
     public ReportUsersService(TelegramBot telegramBot, BinaryContentFileRepository binaryContentFileRepository, ReportUsersRepository reportUsersRepository) {
         this.telegramBot = telegramBot;
@@ -37,20 +36,21 @@ public class ReportUsersService {
         this.reportUsersRepository = reportUsersRepository;
     }
 
-    /**<i>Загрузка файла из чата в директорию и сохранение полного отчета фото+описание в бд</i>
-     *Использует метод создания файла {@link ReportUsersService#createBinaryFile(byte[], Update, Long, String, File)}
+    /**
+     * <i>Загрузка файла из чата в директорию и сохранение полного отчета фото+описание в бд</i>
+     * Использует метод создания файла {@link ReportUsersService#createBinaryFile(byte[], Update, Long, String, File)}
      *
      * @param update апдейт
      * @throws IOException
      */
     public void uploadReportUser(Update update) throws IOException {
-        Long chatId = update.message().chat().id();
         String methodName = new Object() {
         }
                 .getClass()
                 .getEnclosingMethod()
                 .getName();
         logger.info("Current Method is - " + methodName);
+        Long chatId = update.message().chat().id();
         String file_id = update.message().photo()[update.message().photo().length - 1].fileId();
         URL url = new URL("https://api.telegram.org/bot" + telegramBot.getToken() + "/getFile?file_id=" + file_id);
         BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -64,31 +64,21 @@ public class ReportUsersService {
         copyInputStreamToFile(is, localFile);
         br.close();
         is.close();
-        createBinaryFile(b,update,chatId,file_id,localFile);
-
+        createBinaryFile(b, update, chatId, file_id, localFile);
     }
 
     /**
-     * <b>Поиск отчета по его id идентификатору</b>
-     * <br> Используется метод репозитория {@link JpaRepository#findById(Object)}
-     * @param id идентификатор отчета
-     * @return Возвращает найденный отчет
-     */
-    public ReportUsers findReportUsers(Long id) {
-        return reportUsersRepository.findById(id).orElseThrow();
-    }
-
-    /** Метод сохранения изображения и описания в бд
+     * Метод сохранения изображения и описания в бд
      * <br> Используется метод репозитория {@link JpaRepository#save(Object)}
      *
-     * @see com.pengrad.telegrambot.request.SendMessage
-     * @param bytes массив байтов изображения из апи
-     * @param update апдейт
-     * @param chatId Идентификатор чата
-     * @param file_id Идентификатор изображения
+     * @param bytes     массив байтов изображения из апи
+     * @param update    апдейт
+     * @param chatId    Идентификатор чата
+     * @param file_id   Идентификатор изображения
      * @param localFile Директория локального фото
+     * @see com.pengrad.telegrambot.request.SendMessage
      */
-    public void createBinaryFile(byte[] bytes,Update update,Long chatId,String file_id,File localFile) {
+    public void createBinaryFile(byte[] bytes, Update update, Long chatId, String file_id, File localFile) {
         BinaryContentFile binaryContentFile = new BinaryContentFile();
         binaryContentFile.setFileBytes(bytes);
         binaryContentFileRepository.save(binaryContentFile);
@@ -99,14 +89,13 @@ public class ReportUsersService {
         reportUsers.setFileSize(bytes.length);
         reportUsers.setTime(LocalDate.now());
         reportUsers.setChatId(update.message().chat().id());
-        if (update.message().caption()==null) {
+        if (update.message().caption() == null) {
             telegramBot.execute(new SendMessage(chatId, "Вы забыли описать состояние питомца!"));
         }
         reportUsers.setCommentsUser(update.message().caption());
         reportUsersRepository.save(reportUsers);
     }
 
-}
     /**
      * <b>Поиск отчета по его id идентификатору</b>
      * <br> Используется метод репозитория {@link JpaRepository#findById(Object)}
