@@ -25,6 +25,7 @@ import java.io.*;
 import java.io.File;
 import java.net.URI;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -381,7 +382,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
         for (int i = 0; i < reportUsersList.size(); i++) {
             LocalDate date1 = reportUsersList.get(i).getTime();
-            if (date.equals(date1)) {
+            Period period = Period.between(date, date1);
+            if (date.equals(date1) || period.getDays()>31) {
                 long chatId = reportUsersList.get(i).getChatId();
                 String str = "Уважаемый владелец! пришлите отчет о питомце. Спасибо!";
                 SendResponse response = telegramBot.execute(new SendMessage(chatId, str));

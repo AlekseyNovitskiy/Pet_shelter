@@ -7,9 +7,7 @@ import com.example.pet_shelter.repository.DogsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
 import java.util.Collection;
-
 
 @Service
 public class DogsService {
