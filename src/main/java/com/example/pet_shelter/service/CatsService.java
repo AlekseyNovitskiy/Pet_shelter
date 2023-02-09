@@ -1,6 +1,6 @@
 package com.example.pet_shelter.service;
 
-import com.example.pet_shelter.exceptions.DogNullParameterValueException;
+import com.example.pet_shelter.exceptions.CatNullParameterValueException;
 import com.example.pet_shelter.listener.TelegramBotUpdatesListener;
 import com.example.pet_shelter.model.Cats;
 import com.example.pet_shelter.repository.CatsRepository;
@@ -27,7 +27,7 @@ public class CatsService {
 
     /**
      * <i>Заносит в базу созданный объект питомца.
-     * Если объект пуст будует выкинуто исключение DogNullParameterValueException.</i>
+     * Если объект пуст будует выкинуто исключение CatNullParameterValueException.</i>
      *
      * @param cat объект питомца
      * @see CatsRepository
@@ -40,7 +40,7 @@ public class CatsService {
                 .getName();
         logger.info("Current Method is - " + methodName);
         if (cat.getNickname().isBlank() || cat.getNickname().isEmpty()) {
-            throw new DogNullParameterValueException("Кличка питомца не указана");
+            throw new CatNullParameterValueException("Кличка питомца не указана");
         }
         return catsRepository.save(cat);
     }
@@ -58,22 +58,22 @@ public class CatsService {
                 .getEnclosingMethod()
                 .getName();
         logger.info("Current Method is - " + methodName);
-        Cats deleteDog = catsRepository.findById(id).orElse(null);
+        Cats deleteCat = catsRepository.findById(id).orElse(null);
         catsRepository.deleteById(id);
-        return deleteDog;
+        return deleteCat;
     }
 
     /**
      * <i>Заменяет старые параметры питомца на те что были переданы.
-     * Если объект по id не найден будет выкинуто исключение DogNullParameterValueException.
-     * При отсутсвии одного из полей у передаваемого объекта dog будет выкинуто исключение NullPointerException.
+     * Если объект по id не найден будет выкинуто исключение CatNullParameterValueException.
+     * При отсутсвии одного из полей у передаваемого объекта cat будет выкинуто исключение NullPointerException.
      * </i>
      *
      * @param id  Id питомца в базе данных
      * @param cat объект питомца
      * @see CatsRepository
      */
-    public Cats updateDog(Long id, Cats cat) {
+    public Cats updateCat(Long id, Cats cat) {
         String methodName = new Object() {
         }
                 .getClass()
@@ -84,9 +84,9 @@ public class CatsService {
         if (updateCat != null) {
             updateCat.setNickname(cat.getNickname());
             updateCat.setAge(cat.getAge());
-            updateCat.setInfoDog(cat.getInfoDog());
+            updateCat.setInfoCat(cat.getInfoCat());
         } else {
-            throw new DogNullParameterValueException("Недостаточно данных при попытке заменить данные у объекта Cats");
+            throw new CatNullParameterValueException("Недостаточно данных при попытке заменить данные у объекта Cats");
         }
         return catsRepository.save(updateCat);
     }

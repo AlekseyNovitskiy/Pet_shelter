@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +28,7 @@ import java.nio.file.Path;
 public class CatController {
 
     @Value("${size.FotoDogs}")
-    int SIZE_FOTO_DOG; // Максимальный размер файла
+    int SIZE_FOTO; // Максимальный размер файла
 
     private final CatsService catsService;
     private final CatsFotoService catsFotoService;
@@ -44,12 +45,12 @@ public class CatController {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = Cats.class))
-                    ))},tags = "CAT")
+                    ))}, tags = "CAT")
 
     // Внесение данных о новом питомце
     @PostMapping("/create")   // Создание новой записи о питомце
 
-    public Cats createDog(@RequestBody Cats cat) {
+    public Cats createCat(@RequestBody Cats cat) {
         return this.catsService.createCatInDB(cat);
     }
 
@@ -60,10 +61,10 @@ public class CatController {
                     description = "Информация о питомце удалена",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE
-                    ))},tags = "CAT")
+                    ))}, tags = "CAT")
     // Удаление информации о питомце
     @DeleteMapping("/delete/{id}")
-    public Cats deleteDog(@Parameter(description = "Id питомца", example = "1") @PathVariable("id") Long id) {
+    public Cats deleteCat(@Parameter(description = "Id питомца", example = "1") @PathVariable("id") Long id) {
         return this.catsService.deleteCat(id);
     }
 
@@ -74,11 +75,12 @@ public class CatController {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = Cats.class))
-                    ))},tags = "CAT")
+                    ))}, tags = "CAT")
     // Изменение информации о питомце
     @PutMapping("/update/{id}")
-    public Cats deleteDog(@Parameter(description = "Id питомца", example = "1") @PathVariable("id") Long id, @RequestBody Cats cat) {
-        return this.catsService.updateDog(id, cat);
+    public Cats deleteCat(@Parameter(description = "Id питомца", example = "1") @PathVariable("id") Long id,
+                          @RequestBody Cats cat) {
+        return this.catsService.updateCat(id, cat);
     }
 
     @Operation(summary = "Загрузка фотографии питомца",
@@ -87,15 +89,17 @@ public class CatController {
                     description = "Фотография загружена",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE
-                    ))},tags = "CAT")
+                    ))}, tags = "CAT")
 
     // Загрузка фотографии питомца
-    @PostMapping(value = "/{id}/load/fotoDog", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/{id}/load/fotoCat", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     // Прикрепление фото собаки
-    public ResponseEntity<String> uploadFotoCat(@Parameter(description = "Id питомца", example = "1") @PathVariable Long id, @Parameter(description = "Путь к фотографии") @RequestParam MultipartFile fotoCat) throws
+    public ResponseEntity<String> uploadFotoCat(@Parameter(description = "Id питомца", example = "1")
+                                                @PathVariable Long id, @Parameter(description = "Путь к фотографии")
+                                                @RequestParam MultipartFile fotoCat) throws
 
             IOException {
-        if (fotoCat.getSize() >= SIZE_FOTO_DOG) {         // Ограничение размера файла
+        if (fotoCat.getSize() >= SIZE_FOTO) {         // Ограничение размера файла
             return ResponseEntity.badRequest().body("Файл большого размера");
         }
         catsFotoService.uploadFotoCat(id, fotoCat);
@@ -109,10 +113,11 @@ public class CatController {
                     description = "Фотография найдена",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE
-                    ))},tags = "DOG")
+                    ))}, tags = "CAT")
     // Просмотр фотографии собаки
-    @GetMapping(value = "/{id}/fotoDog")
-    public void downloadFotoDog(@Parameter(description = "Id питомца", example = "1") @PathVariable Long id, HttpServletResponse response) throws IOException {
+    @GetMapping(value = "/{id}/fotoCat")
+    public void downloadFotoCat(@Parameter(description = "Id питомца", example = "1") @PathVariable Long id,
+                                HttpServletResponse response) throws IOException {
         CatsFoto catsFoto = catsFotoService.findFotoCat(id);
         Path path = Path.of(catsFoto.getFilePath());
         try (InputStream is = Files.newInputStream(path);
