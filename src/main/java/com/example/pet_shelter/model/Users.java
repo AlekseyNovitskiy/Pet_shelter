@@ -27,6 +27,9 @@ public class Users {
     @JoinColumn(name = "dog_id")
     private Dogs dog;
 
+    @ManyToOne
+    @JoinColumn(name = "cat_id")
+    private Cats cat;
 
     public Long getId() {
         return id;
@@ -76,4 +79,11 @@ public class Users {
         this.dog = dog;
     }
 
+    public Cats getCat() {
+        return cat;
+    }
+
+    public void setCat(Cats cat) {
+        this.cat = cat;
+    }
 }
