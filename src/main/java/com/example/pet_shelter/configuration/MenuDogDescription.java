@@ -1,6 +1,6 @@
 package com.example.pet_shelter.configuration;
 
-public enum MenuDescription {
+public enum MenuDogDescription {
     AboutPetShelterDocx,
     SCHEDULE,
     SAFETYRULES,
