@@ -366,7 +366,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     /**
      * Фоновое приложение для поиска User с не сданными отчетами
      */
-    @Scheduled(fixedDelay = 60_000L)
+    @Scheduled(fixedDelay = 1_000L*60*60*24) // Раз в сутки
     public void run() {
         String methodName = new Object() {
         }
@@ -383,11 +383,24 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         for (int i = 0; i < reportUsersList.size(); i++) {
             LocalDate date1 = reportUsersList.get(i).getTime();
             Period period = Period.between(date, date1); // Вычисление промежутка между датами
-            if (date.equals(date1) || period.getDays()>31) {
-                long chatId = reportUsersList.get(i).getChatId();
+            long chatId = reportUsersList.get(i).getChatId();
+            if (period.getDays()==1) {
+                String str = "Уважаемый владелец! Спасибо за вовремя сданный отчет!";
+                SendResponse response = telegramBot.execute(new SendMessage(chatId, str));
+            }
+            else if (period.getDays()>31 && period.getDays()< 46) {
+                String str = "Уважаемый владелец! У вас идет испытательный срок!";
+                SendResponse response = telegramBot.execute(new SendMessage(chatId, str));
+            }
+            else if (period.getDays()>46) {
+                String str = "Уважаемый владелец! У вас идет прошел испытательный срок! Необходимо вернуть питомца.";
+                SendResponse response = telegramBot.execute(new SendMessage(chatId, str));
+            }
+            else if (date.equals(date1) || period.getDays()>31) {
                 String str = "Уважаемый владелец! пришлите отчет о питомце. Спасибо!";
                 SendResponse response = telegramBot.execute(new SendMessage(chatId, str));
             }
         }
     }
+
 }
