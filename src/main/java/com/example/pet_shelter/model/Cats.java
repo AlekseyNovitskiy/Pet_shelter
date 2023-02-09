@@ -19,7 +19,7 @@ public class Cats{
     private int age;
 
     @Column(name = "info_cat")     // Информация о собаке
-    private String infoDog;
+    private String infoCat;
 
     @OneToMany(mappedBy = "cat")
     Collection<Users> user;
@@ -53,12 +53,12 @@ public class Cats{
         this.age = age;
     }
 
-    public String getInfoDog() {
-        return infoDog;
+    public String getInfoCat() {
+        return infoCat;
     }
 
-    public void setInfoDog(String infoDog) {
-        this.infoDog = infoDog;
+    public void setInfoCat(String infoCat) {
+        this.infoCat = infoCat;
     }
 
 }
