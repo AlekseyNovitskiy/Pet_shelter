@@ -49,7 +49,6 @@ public class CatController {
 
     // Внесение данных о новом питомце
     @PostMapping("/create")   // Создание новой записи о питомце
-
     public Cats createCat(@RequestBody Cats cat) {
         return this.catsService.createCatInDB(cat);
     }
@@ -78,7 +77,7 @@ public class CatController {
                     ))}, tags = "CAT")
     // Изменение информации о питомце
     @PutMapping("/update/{id}")
-    public Cats deleteCat(@Parameter(description = "Id питомца", example = "1") @PathVariable("id") Long id,
+    public Cats updateCat(@Parameter(description = "Id питомца", example = "1") @PathVariable("id") Long id,
                           @RequestBody Cats cat) {
         return this.catsService.updateCat(id, cat);
     }
