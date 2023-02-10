@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 public class MenuMakerDog {
 
     public InlineKeyboardMarkup startMenuKeyboard() {
-        InlineKeyboardButton first = new InlineKeyboardButton("\uD83D\uDC08 Кошачий приют").callbackData(MenuDogDescription.CATSHELTERENTER.name());//сделано
-        InlineKeyboardButton second = new InlineKeyboardButton("\uD83D\uDC15 Собачий приют ").callbackData(MenuDogDescription.DOGSHELTERENTER.name());//сделано
+        InlineKeyboardButton first = new InlineKeyboardButton("\uD83D\uDC08 Кошачий приют").callbackData(MenuDogDescription.CATSHELTERENTER.name());
+        InlineKeyboardButton second = new InlineKeyboardButton("\uD83D\uDC15 Собачий приют ").callbackData(MenuDogDescription.DOGSHELTERENTER.name());
         InlineKeyboardMarkup startKeyboard = new InlineKeyboardMarkup(
                 new InlineKeyboardButton[]{first},
                 new InlineKeyboardButton[]{second});
@@ -18,10 +18,10 @@ public class MenuMakerDog {
     }
 
     public InlineKeyboardMarkup afterStartDogKeyBoard() {
-        InlineKeyboardButton one = new InlineKeyboardButton("Узнать информацию о приюте").callbackData(MenuDogDescription.AboutPetShelter.name());//сделано
+        InlineKeyboardButton one = new InlineKeyboardButton("Узнать информацию о приюте").callbackData(MenuDogDescription.AboutPetShelter.name());
         InlineKeyboardButton two = new InlineKeyboardButton("Как взять животное из приюта").callbackData(MenuDogDescription.HOWTOTAKEDOG.name());
-        InlineKeyboardButton three = new InlineKeyboardButton("Прислать отчет о питомце").callbackData(MenuDogDescription.SENDDOGPHOTO.name());//сделано
-        InlineKeyboardButton four = new InlineKeyboardButton("Позвать волонтёра").callbackData(MenuDogDescription.VOLUNTEERCALL.name());//сделано
+        InlineKeyboardButton three = new InlineKeyboardButton("Прислать отчет о питомце").callbackData(MenuDogDescription.SENDDOGPHOTO.name());
+        InlineKeyboardButton four = new InlineKeyboardButton("Позвать волонтёра").callbackData(MenuDogDescription.VOLUNTEERCALL.name());
         InlineKeyboardMarkup startDogKeyBoard = new InlineKeyboardMarkup(
                 new InlineKeyboardButton[]{one},
                 new InlineKeyboardButton[]{two},
@@ -39,11 +39,11 @@ public class MenuMakerDog {
      * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
      */
     public InlineKeyboardMarkup menu1Keyboard() {
-        InlineKeyboardButton one = new InlineKeyboardButton("рассказать о приюте").callbackData(MenuDogDescription.AboutPetShelterDocx.name()); //сделано
-        InlineKeyboardButton two = new InlineKeyboardButton("расписание работы приюта и адрес, схему проезда").callbackData("SCHEDULE"); //сделано
-        InlineKeyboardButton three = new InlineKeyboardButton("техника безопасности на территории приюта").callbackData("SAFETYRULES");
-        InlineKeyboardButton four = new InlineKeyboardButton("записать контактные данные для связи").callbackData(MenuDogDescription.WRITECONTACS.name()); //сделано
-        InlineKeyboardButton five = new InlineKeyboardButton("позвать волонтера").callbackData(MenuDogDescription.VOLUNTEERCALL.name());//сделано
+        InlineKeyboardButton one = new InlineKeyboardButton("рассказать о приюте").callbackData(MenuDogDescription.AboutPetShelterDocx.name());
+        InlineKeyboardButton two = new InlineKeyboardButton("расписание работы приюта и адрес, схему проезда").callbackData(MenuDogDescription.SCHEDULE.name());
+        InlineKeyboardButton three = new InlineKeyboardButton("техника безопасности на территории приюта").callbackData(MenuDogDescription.SAFETYRULES.name());
+        InlineKeyboardButton four = new InlineKeyboardButton("записать контактные данные для связи").callbackData(MenuDogDescription.WRITECONTACS.name());
+        InlineKeyboardButton five = new InlineKeyboardButton("позвать волонтера").callbackData(MenuDogDescription.VOLUNTEERCALL.name());
         InlineKeyboardMarkup keyboardMenu1 = new InlineKeyboardMarkup(
                 new InlineKeyboardButton[]{one},
                 new InlineKeyboardButton[]{two},
@@ -62,11 +62,11 @@ public class MenuMakerDog {
      * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
      */
     public InlineKeyboardMarkup menu2Keyboard() {
-        InlineKeyboardButton first = new InlineKeyboardButton("правила знакомства с собакой").callbackData("1");
-        InlineKeyboardButton second = new InlineKeyboardButton("список документов").callbackData("MENULISTOFDOCUMENTS"); //сделано
-        InlineKeyboardButton third = new InlineKeyboardButton("советы кинолога").callbackData("CYNOLOGISTADVICE");//сделано
-        InlineKeyboardButton fourth = new InlineKeyboardButton("принять и записать контактные данные").callbackData(MenuDogDescription.WRITECONTACS.name());//сделано
-        InlineKeyboardButton fifth = new InlineKeyboardButton("позвать волонтера").callbackData(MenuDogDescription.VOLUNTEERCALL.name());//сделано
+        InlineKeyboardButton first = new InlineKeyboardButton("правила знакомства с собакой").callbackData(MenuDogDescription.DOGMEETINGRULES.name());
+        InlineKeyboardButton second = new InlineKeyboardButton("список документов").callbackData(MenuDogDescription.MENULISTOFDOCUMENTS.name());
+        InlineKeyboardButton third = new InlineKeyboardButton("советы кинолога").callbackData(MenuDogDescription.CYNOLOGISTADVICE.name());
+        InlineKeyboardButton fourth = new InlineKeyboardButton("принять и записать контактные данные").callbackData(MenuDogDescription.WRITECONTACS.name());
+        InlineKeyboardButton fifth = new InlineKeyboardButton("позвать волонтера").callbackData(MenuDogDescription.VOLUNTEERCALL.name());
         InlineKeyboardMarkup keyboard2 = new InlineKeyboardMarkup(
                 new InlineKeyboardButton[]{first},
                 new InlineKeyboardButton[]{second},
@@ -85,7 +85,7 @@ public class MenuMakerDog {
      * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
      */
     public InlineKeyboardMarkup menu3Keyboard() {
-        InlineKeyboardButton first = new InlineKeyboardButton("отправить отчет").callbackData(MenuDogDescription.SENDDOGPHOTO.name());//сделано
+        InlineKeyboardButton first = new InlineKeyboardButton("отправить отчет").callbackData(MenuDogDescription.SENDDOGPHOTO.name());
         InlineKeyboardMarkup keyboard2 = new InlineKeyboardMarkup(
                 first);
         return keyboard2;
@@ -102,12 +102,12 @@ public class MenuMakerDog {
      * @see com.pengrad.telegrambot.TelegramBot
      */
     public InlineKeyboardMarkup inlineButtonsListOfRules(Long chatId) {
-        InlineKeyboardButton first = new InlineKeyboardButton("документы, чтобы взять собаку").callbackData("6");
-        InlineKeyboardButton second = new InlineKeyboardButton("Транспортировка животного").callbackData("7");
-        InlineKeyboardButton third = new InlineKeyboardButton("Обустройство дома для щенка").callbackData("8");
-        InlineKeyboardButton fourth = new InlineKeyboardButton("Обустройство дома для взрослой собаки").callbackData("9");
-        InlineKeyboardButton fifth = new InlineKeyboardButton("Для собаки с ограниченными возможностями").callbackData("10");
-        InlineKeyboardButton six = new InlineKeyboardButton("причины отказа ").callbackData("11");
+        InlineKeyboardButton first = new InlineKeyboardButton("документы, чтобы взять собаку").callbackData(MenuDogDescription.DOCSTOTAKEDOG.name());
+        InlineKeyboardButton second = new InlineKeyboardButton("Транспортировка животного").callbackData(MenuDogDescription.DOGTRASPORTATION.name());
+        InlineKeyboardButton third = new InlineKeyboardButton("Обустройство дома для щенка").callbackData(MenuDogDescription.HOMEFORPUPPEY.name());
+        InlineKeyboardButton fourth = new InlineKeyboardButton("Обустройство дома для взрослой собаки").callbackData(MenuDogDescription.HOMEFORADULTDOG.name());
+        InlineKeyboardButton fifth = new InlineKeyboardButton("Для собаки с ограниченными возможностями").callbackData(MenuDogDescription.LIMITEDDOG.name());
+        InlineKeyboardButton six = new InlineKeyboardButton("причины отказа ").callbackData(MenuDogDescription.REFUSE.name());
         InlineKeyboardMarkup recommendationKeyboard = new InlineKeyboardMarkup(
                 new InlineKeyboardButton[]{first},
                 new InlineKeyboardButton[]{second},
@@ -127,7 +127,7 @@ public class MenuMakerDog {
      * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
      */
     public InlineKeyboardMarkup buttonCynologist(Long chatId) {
-        InlineKeyboardButton first = new InlineKeyboardButton("Советуем этих кинологов").callbackData("buttonCynologist");
+        InlineKeyboardButton first = new InlineKeyboardButton("Лучшие кинологи вашего города").url("https://www.google.com/");
         InlineKeyboardMarkup cynologistKeyboard = new InlineKeyboardMarkup(
                 first);
         return cynologistKeyboard;

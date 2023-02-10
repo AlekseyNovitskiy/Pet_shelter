@@ -46,7 +46,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final MenuMakerDog menuMakerDog;
     private final MenuMakerCat menuMakerCat;
     private final ReportUsersService reportUsersService;
-    private  final ShelterService shelterService;
+    private final ShelterService shelterService;
 
     public TelegramBotUpdatesListener(UsersService usersService, MenuMakerDog menuMakerDog, ReportUsersService reportUsersService,
                                       BinaryContentFileRepository binaryContentFileRepository,
@@ -63,14 +63,60 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
     private boolean isWaitingUserData; //ожидаем сообщение с данными пользователя после нажатия кнопки "записать данные пользователя"
-    private boolean isProcess;         //ожидаем поочередно загрузку фотографии и сообщения о состоянии
     private boolean isPhoto;           //ожидаем загрузку фото
 
-    @Value("${nameFileAboutTheNursery}") // Место расположения файла информации о приюте собак
-    String NAME_FILE_ABOUT_THE_NURSERY;
-    @Value("${fileAboutCatNursery}") // Место расположения файла информации о приюте кошек
-    String NAME_FILE_ABOUT_CAT_NURSERY;
-    int NUMBER_CHARACTERS_READ_FILE_ABOUT_THE_NURSERY = 2048; // Max символов считываемое из файла *Информация о приюте*
+    @Value("${dogSafetyFile}")
+    String DOGSHELTER_SAFETY_FILE;
+    @Value("${cynologistAdvice}")
+    String CYNOLOGIST_ADVICE;
+
+    @Value("${dogMeetingRules}")
+    String DOG_MEETING_RULES;
+
+    @Value("${docsForDog}")
+    String DOCS_FOR_DOG;
+
+    @Value("${dogsTransportation}")
+    String DOGS_TRANSPORTATION;
+
+    @Value("${homeForPuppy}")
+    String HOME_FOR_PUPPY;
+
+    @Value("${homeForAdultDog}")
+    String HOME_FOR_ADULT_DOG;
+
+    @Value("${forLimitedDogs}")
+    String FOR_LIMITED_DOGS;
+
+    @Value("${refuse}")
+    String REFUSE;
+
+    // значения для кошек
+    @Value("${safetyRulesForCat}")
+    String SAFETY_RULES_CATS;
+
+    @Value("${catMeetingRules}")
+    String CAT_MEETING_RULES;
+
+    @Value("${docsToTakeCat}")
+    String DOCS_TO_TAKE_CAT;
+
+    @Value("${catTransportation}")
+    String CAT_TRANSPORTATION;
+
+    @Value("${homeForKitten}")
+    String HOME_FOR_KITTEN;
+
+    @Value("${homeForAdultCat}")
+    String HOME_FOR_ADULT_CAT;
+
+    @Value("${forLimitedCats}")
+    String FOR_LIMITED_CATS;
+
+    @Value("${catRefuse}")
+    String CAT_REFUSE;
+
+    int NUMBER_CHARACTERS = 2048; // Max символов считываемое из файла
 
     @Autowired
     private TelegramBot telegramBot;
@@ -109,7 +155,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                         callBackDataListOfRecommendations(chatId, update);
                         startMenuCats(chatId, update);
                         menu1KeyboardCats(chatId, update);
-                        menu2KeyboardCats(chatId,update);
+                        menu2KeyboardCats(chatId, update);
+                        listOfDocumentsForCats(chatId, update);
                     }
                 });
         logger.info("Processing update: {}", updates);
@@ -134,11 +181,15 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 telegramBot.execute(new SendMessage(chatId,
                         "Введите данные пользователя в формате \"Имя Фамилия Телефон Почта (через пробел)\""));
             } else if (data.equals(MenuDogDescription.AboutPetShelterDocx.name())) {
+                flagChoosingShelter = 1L;
                 aboutTheShelter(chatId);
             } else if (data.equals(MenuDogDescription.SCHEDULE.name())) {
                 sendLocationPhoto(chatId);
             } else if (data.equals(MenuDogDescription.VOLUNTEERCALL.name())) {
                 telegramBot.execute(new SendMessage(chatId, "Волонтер позван"));
+            }
+            if (data.equals(MenuDogDescription.SAFETYRULES.name())) {
+                fileRead(chatId, NUMBER_CHARACTERS, DOGSHELTER_SAFETY_FILE);
             }
         }
     }
@@ -158,10 +209,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             if (data.equals(MenuDogDescription.MENULISTOFDOCUMENTS.name())) {
                 telegramBot.execute(new SendMessage(chatId, "Список документов").replyMarkup(menuMakerDog.inlineButtonsListOfRules(chatId)));
             } else if (data.equals(MenuDogDescription.CYNOLOGISTADVICE.name())) {
-                telegramBot.execute(new SendMessage(chatId, "Ознакомьтесь с правилам обращения с собакой или выберите кинолога:").replyMarkup(menuMakerDog.buttonCynologist(chatId))
-                );
+                fileRead(chatId, NUMBER_CHARACTERS, CYNOLOGIST_ADVICE);
+                telegramBot.execute(new SendMessage(chatId, "Ознакомьтесь с правилам обращения с собакой или выберите кинолога:").replyMarkup(menuMakerDog.buttonCynologist(chatId)));
             } else if (data.equals(MenuDogDescription.WRITECONTACS.name())) {
                 isWaitingUserData = true;
+            } else if (data.equals(MenuDogDescription.DOGMEETINGRULES.name())) {
+                fileRead(chatId, NUMBER_CHARACTERS, DOG_MEETING_RULES);
             }
         }
     }
@@ -178,8 +231,18 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         CallbackQuery callbackQuery = update.callbackQuery();
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
-            if (data.equals("6")) {
+            if (data.equals(MenuDogDescription.DOCSTOTAKEDOG.name())) {
                 sendPetsDocuments(chatId);
+            } else if (data.equals(MenuDogDescription.DOGTRASPORTATION.name())) {
+                fileRead(chatId, NUMBER_CHARACTERS, DOGS_TRANSPORTATION);
+            } else if (data.equals(MenuDogDescription.HOMEFORPUPPEY.name())) {
+                fileRead(chatId, NUMBER_CHARACTERS, HOME_FOR_PUPPY);
+            } else if (data.equals(MenuDogDescription.HOMEFORADULTDOG.name())) {
+                fileRead(chatId, NUMBER_CHARACTERS, HOME_FOR_ADULT_DOG);
+            } else if (data.equals(MenuDogDescription.LIMITEDDOG.name())) {
+                fileRead(chatId, NUMBER_CHARACTERS, FOR_LIMITED_DOGS);
+            } else if (data.equals(MenuDogDescription.REFUSE.name())) {
+                fileRead(chatId, NUMBER_CHARACTERS, REFUSE);
             }
         }
     }
@@ -189,11 +252,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
             if (data.equals(MenuDogDescription.DOGSHELTERENTER.name())) {
-                telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы выбрали собачий приют").replyMarkup(menuMakerDog.afterStartDogKeyBoard()));
+                telegramBot.execute(new SendMessage(chatId, startLine + ", Вы выбрали собачий приют").replyMarkup(menuMakerDog.afterStartDogKeyBoard()));
             } else if (data.equals(MenuDogDescription.AboutPetShelter.name())) {
-                telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы выбрали пункт выбрать информацию о приюте").replyMarkup(menuMakerDog.menu1Keyboard()));
+                telegramBot.execute(new SendMessage(chatId, startLine + ", Вы выбрали пункт выбрать информацию о приюте").replyMarkup(menuMakerDog.menu1Keyboard()));
             } else if (data.equals(MenuDogDescription.HOWTOTAKEDOG.name())) {
-                telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы выбрали пункт как взять информацию о питомце").replyMarkup(menuMakerDog.menu2Keyboard()));
+                telegramBot.execute(new SendMessage(chatId, startLine + ", Вы выбрали пункт как взять информацию о питомце").replyMarkup(menuMakerDog.menu2Keyboard()));
             } else if (data.equals(MenuDogDescription.SENDDOGPHOTO.name())) {
                 telegramBot.execute(new SendMessage(chatId, "Загрузите отчет").replyMarkup(menuMakerDog.menu3Keyboard()));
                 isPhoto = true;
@@ -206,13 +269,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
             if (data.equals(MenuDogDescription.CATSHELTERENTER.name())) {
-                telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы выбрали кошачий приют").replyMarkup(menuMakerCat.afterStartCatKeyBoard()));
+                telegramBot.execute(new SendMessage(chatId, startLine + ", Вы выбрали кошачий приют").replyMarkup(menuMakerCat.afterStartCatKeyBoard()));
             } else if (data.equals(MenuCatDescription.AboutCatPetShelter.name())) {
-                telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы выбрали раздел о приюте").replyMarkup(menuMakerCat.menu1KeyboardCat()));
+                telegramBot.execute(new SendMessage(chatId, startLine + ", Вы выбрали раздел о приюте").replyMarkup(menuMakerCat.menu1KeyboardCat()));
             } else if (data.equals(MenuCatDescription.CatVolunteer.name())) {
                 telegramBot.execute(new SendMessage(chatId, "Волонтер позван"));
             } else if (data.equals(MenuCatDescription.HOWTOTAKECAT.name())) {
-                telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы выбрали раздел как взять животное").replyMarkup(menuMakerCat.menu2KeyboardCat()));
+                telegramBot.execute(new SendMessage(chatId, startLine + ", Вы выбрали раздел как взять животное").replyMarkup(menuMakerCat.menu2KeyboardCat()));
             } else if (data.equals(MenuCatDescription.SENDPETREPORT.name())) {
                 telegramBot.execute(new SendMessage(chatId, "Загрузите отчет").replyMarkup(menuMakerDog.menu3Keyboard()));
                 isPhoto = true;
@@ -225,6 +288,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
             if (data.equals(MenuCatDescription.AboutCatPetShelterDocx.name())) {
+                flagChoosingShelter = 2L;
                 aboutTheShelter(chatId);
             } else if (data.equals(MenuCatDescription.CATNURSERYLOCATION.name())) {
                 sendCatNurseryLocationPhoto(chatId);
@@ -241,7 +305,29 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
             if (data.equals(MenuCatDescription.CATDOCUMENTS.name())) {
-                telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы выбрали списки документов:").replyMarkup(menuMakerCat.inlineCatButtonsListOfRules(chatId)));
+                telegramBot.execute(new SendMessage(chatId, startLine + ", Вы выбрали списки документов:").replyMarkup(menuMakerCat.inlineCatButtonsListOfRules(chatId)));
+            } else if (data.equals(MenuCatDescription.CATMEETINGRULES.name())) {
+                fileRead(chatId, NUMBER_CHARACTERS, CAT_MEETING_RULES);
+            }
+        }
+    }
+
+    private void listOfDocumentsForCats(Long chatId, Update update) {
+        CallbackQuery callbackQuery = update.callbackQuery();
+        if (update.callbackQuery() != null) {
+            String data = callbackQuery.data();
+            if (data.equals(MenuCatDescription.DOCSTOTAKECAT.name())) {
+                fileRead(chatId, NUMBER_CHARACTERS, DOCS_TO_TAKE_CAT);
+            } else if (data.equals(MenuCatDescription.CATTRANSPORTATIONRULES.name())) {
+                fileRead(chatId, NUMBER_CHARACTERS, CAT_TRANSPORTATION);
+            } else if (data.equals(MenuCatDescription.HOMEFORKITTEN.name())) {
+                fileRead(chatId, NUMBER_CHARACTERS, HOME_FOR_KITTEN);
+            } else if (data.equals(MenuCatDescription.HOMEFORADULTCAT.name())) {
+                fileRead(chatId, NUMBER_CHARACTERS, HOME_FOR_ADULT_CAT);
+            } else if (data.equals(MenuCatDescription.FORLIMITEDCATS.name())) {
+                fileRead(chatId, NUMBER_CHARACTERS, FOR_LIMITED_CATS);
+            } else if (data.equals(MenuCatDescription.CATREFUSE.name())) {
+                fileRead(chatId, NUMBER_CHARACTERS, CAT_REFUSE);
             }
         }
     }
@@ -281,10 +367,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             switch (userMessage) {
                 case "/start":
                     startLine=greetings(chatId,update);
-                    telegramBot.execute(new SendMessage(chatId, startLine+", Выберите приют").replyMarkup(menuMakerDog.startMenuKeyboard()));
+                    telegramBot.execute(new SendMessage(chatId, startLine + ", Выберите приют").replyMarkup(menuMakerDog.startMenuKeyboard()));
                     break;
                 default:
-                    telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы ввели что-то странное!"));
+                    telegramBot.execute(new SendMessage(chatId, startLine + ", Вы ввели что-то странное!"));
             }
         }
     }
@@ -297,10 +383,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * @see com.pengrad.telegrambot.request.SendMessage
      */
     public String greetings(Long chatId, Update update) {
-        String firstName = update.message().chat().firstName();
+        String firstName = update.myChatMember().chat().firstName();
         String lastName = update.message().chat().lastName();
         return firstName + " " + lastName;
     }
+
     /**
      * <i>Кнопка меню бота</i>
      *
@@ -309,18 +396,15 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      */
     public void menuButton() {
         SetMyCommands message = new SetMyCommands(
-                new BotCommand("/start", "Запустить бота"),
-                new BotCommand("/menu1", "Узнать информацию о приюте"),
-                new BotCommand("/menu2", "Как взять собаку из приюта"),
-                new BotCommand("/menu3", "Прислать отчет о питомце"),
-                new BotCommand("/menu4", "Позвать волонтера"));
+                new BotCommand("/start", "Запустить бота"));
         telegramBot.execute(message);
     }
 
-    /** <i> Вывод информации о приюте </i> <br>
+    /**
+     * <i> Вывод информации о приюте </i> <br>
      *
      * @param chatId идентификатор чата
-     *  flagChoosingShelter - флаг выбранного приюта
+     *               flagChoosingShelter - флаг выбранного приюта
      */
     private void aboutTheShelter(long chatId) {
         String methodName = new Object() {
@@ -330,8 +414,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 .getName();
         logger.info("Current Method is - " + methodName);
 
-        Shelters shelters =new Shelters();
-        shelters=shelterService.getShelter(flagChoosingShelter);
+        Shelters shelters = new Shelters();
+        shelters = shelterService.getShelter(flagChoosingShelter);
         telegramBot.execute(new SendMessage(chatId, shelters.getDescriptionShelter()));
     }
 
@@ -353,7 +437,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         float latitude = (float) 59.82225018231752;
         float longitude = (float) 30.178212453672643;
         telegramBot.execute(new SendMessage(chatId, "Мы работаем по такому графику, наш адрес такой-то"));
-        java.io.File file = new File("1.png");
+        java.io.File file = new File("src/main/resources/docs/dogLocation.jpg");
         telegramBot.execute(new SendPhoto(chatId, file));
         telegramBot.execute(new SendMessage(chatId, "Или используйте навигатор"));
         SendLocation location = new SendLocation(chatId, latitude, longitude);
@@ -370,7 +454,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         float latitude = (float) 60.01192431352728;
         float longitude = (float) 29.721648774315117;
         telegramBot.execute(new SendMessage(chatId, "Мы работаем с 08:00 до 22:00"));
-        java.io.File file = new File("1.png");
+        java.io.File file = new File("src/main/resources/docs/catLocation.jpg");
         telegramBot.execute(new SendPhoto(chatId, file));
         telegramBot.execute(new SendMessage(chatId, "Или используйте навигатор"));
         SendLocation location = new SendLocation(chatId, latitude, longitude);
@@ -394,7 +478,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 .getName();
         logger.info("Current Method is - " + methodName);
         telegramBot.execute(new SendMessage(chatId, "Файл со списком нужных документов"));
-        java.io.File file = new File("Документы, чтобы взять собаку.docx");
+        java.io.File file = new File(DOCS_FOR_DOG);
         telegramBot.execute(new SendDocument(chatId, file));
     }
 
@@ -457,6 +541,21 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 SendResponse response = telegramBot.execute(new SendMessage(chatId, str));
             }
         }
+    }
+
+    private void fileRead(long chatId, int bytes, String nameOfFile) {
+        String methodName = new Object() {
+        }
+                .getClass()
+                .getEnclosingMethod()
+                .getName();
+        logger.info("Current Method is - " + methodName);
+        char[] buf = new char[bytes];
+        try (FileReader reader = new FileReader(nameOfFile)) {
+            reader.read(buf);
+        } catch (IOException ex) {
+        }
+        telegramBot.execute(new SendMessage(chatId, new String(buf)));
     }
 
 }

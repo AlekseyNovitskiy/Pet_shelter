@@ -33,7 +33,7 @@ public class MenuMakerCat {
     public InlineKeyboardMarkup menu1KeyboardCat() {
         InlineKeyboardButton one = new InlineKeyboardButton("рассказать о приюте").callbackData(MenuCatDescription.AboutCatPetShelterDocx.name());
         InlineKeyboardButton two = new InlineKeyboardButton("расписание работы приюта и адрес, схему проезда").callbackData(MenuCatDescription.CATNURSERYLOCATION.name());
-        InlineKeyboardButton three = new InlineKeyboardButton("техника безопасности на территории приюта").callbackData("space");
+        InlineKeyboardButton three = new InlineKeyboardButton("техника безопасности на территории приюта").callbackData(MenuCatDescription.SAFETYRULES.name());
         InlineKeyboardButton four = new InlineKeyboardButton("записать контактные данные для связи").callbackData(MenuCatDescription.WRITECONTACTSCAT.name());
         InlineKeyboardButton five = new InlineKeyboardButton("позвать волонтера").callbackData(MenuCatDescription.CatVolunteer.name());
         InlineKeyboardMarkup keyboardMenu1Cat = new InlineKeyboardMarkup(
@@ -54,7 +54,7 @@ public class MenuMakerCat {
      * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
      */
     public InlineKeyboardMarkup menu2KeyboardCat() {
-        InlineKeyboardButton first = new InlineKeyboardButton("правила знакомства с кошкой").callbackData("1");
+        InlineKeyboardButton first = new InlineKeyboardButton("правила знакомства с кошкой").callbackData(MenuCatDescription.CATMEETINGRULES.name());
         InlineKeyboardButton second = new InlineKeyboardButton("список документов").callbackData(MenuCatDescription.CATDOCUMENTS.name());
         InlineKeyboardButton fourth = new InlineKeyboardButton("принять и записать контактные данные").callbackData(MenuDogDescription.WRITECONTACS.name());
         InlineKeyboardButton fifth = new InlineKeyboardButton("позвать волонтера").callbackData(MenuDogDescription.VOLUNTEERCALL.name());
@@ -65,6 +65,7 @@ public class MenuMakerCat {
                 new InlineKeyboardButton[]{fifth});
         return keyboard2Cat;
     }
+
     /**
      * <i>Клавиатура списка правил для кошек</i>
      *
@@ -75,12 +76,12 @@ public class MenuMakerCat {
      * @see com.pengrad.telegrambot.TelegramBot
      */
     public InlineKeyboardMarkup inlineCatButtonsListOfRules(Long chatId) {
-        InlineKeyboardButton first = new InlineKeyboardButton("документы, чтобы взять кошку").callbackData("space");
-        InlineKeyboardButton second = new InlineKeyboardButton("Транспортировка животного").callbackData("space");
-        InlineKeyboardButton third = new InlineKeyboardButton("Обустройство дома для кошки").callbackData("space");
-        InlineKeyboardButton fourth = new InlineKeyboardButton("Обустройство дома для взрослой кошки").callbackData("space");
-        InlineKeyboardButton fifth = new InlineKeyboardButton("Для кошек с ограниченными возможностями").callbackData("space");
-        InlineKeyboardButton six = new InlineKeyboardButton("причины отказа ").callbackData("space");
+        InlineKeyboardButton first = new InlineKeyboardButton("документы, чтобы взять кошку").callbackData(MenuCatDescription.DOCSTOTAKECAT.name());
+        InlineKeyboardButton second = new InlineKeyboardButton("Транспортировка животного").callbackData(MenuCatDescription.CATTRANSPORTATIONRULES.name());
+        InlineKeyboardButton third = new InlineKeyboardButton("Обустройство дома для котенка").callbackData(MenuCatDescription.HOMEFORKITTEN.name());
+        InlineKeyboardButton fourth = new InlineKeyboardButton("Обустройство дома для взрослой кошки").callbackData(MenuCatDescription.HOMEFORADULTCAT.name());
+        InlineKeyboardButton fifth = new InlineKeyboardButton("Для кошек с ограниченными возможностями").callbackData(MenuCatDescription.FORLIMITEDCATS.name());
+        InlineKeyboardButton six = new InlineKeyboardButton("причины отказа ").callbackData(MenuCatDescription.CATREFUSE.name());
         InlineKeyboardMarkup recommendationKeyboardCat = new InlineKeyboardMarkup(
                 new InlineKeyboardButton[]{first},
                 new InlineKeyboardButton[]{second},

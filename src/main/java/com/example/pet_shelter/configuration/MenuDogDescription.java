@@ -15,5 +15,14 @@ public enum MenuDogDescription {
     AboutPetShelter,
     HOWTOTAKEDOG,
 
-    SENDDOGPHOTO
+    SENDDOGPHOTO,
+    DOGMEETINGRULES,
+    DOCSTOTAKEDOG,
+
+    DOGTRASPORTATION,
+
+    HOMEFORPUPPEY,
+    HOMEFORADULTDOG,
+    LIMITEDDOG,
+    REFUSE;
 }
