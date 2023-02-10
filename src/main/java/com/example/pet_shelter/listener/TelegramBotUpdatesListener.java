@@ -6,10 +6,12 @@ import com.example.pet_shelter.configuration.MenuCatDescription;
 import com.example.pet_shelter.configuration.MenuDogDescription;
 import com.example.pet_shelter.exceptions.UsersNullParameterValueException;
 import com.example.pet_shelter.model.ReportUsers;
+import com.example.pet_shelter.model.Shelters;
 import com.example.pet_shelter.model.Users;
 import com.example.pet_shelter.repository.BinaryContentFileRepository;
 import com.example.pet_shelter.repository.ReportUsersRepository;
 import com.example.pet_shelter.service.ReportUsersService;
+import com.example.pet_shelter.service.ShelterService;
 import com.example.pet_shelter.service.UsersService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
@@ -36,6 +38,7 @@ import java.util.List;
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
+    private Long flagChoosingShelter; // Флаг выбора приюта
     private final ReportUsersRepository reportUsersRepository;
     private final BinaryContentFileRepository binaryContentFileRepository;
     private final UsersService usersService;
@@ -43,16 +46,18 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private final MenuMakerCat menuMakerCat;
     private final ReportUsersService reportUsersService;
+    private  final ShelterService shelterService;
 
     public TelegramBotUpdatesListener(UsersService usersService, MenuMakerDog menuMakerDog, ReportUsersService reportUsersService,
                                       BinaryContentFileRepository binaryContentFileRepository,
-                                      ReportUsersRepository reportUsersRepository, MenuMakerCat menuMakerCat) {
+                                      ReportUsersRepository reportUsersRepository, MenuMakerCat menuMakerCat, ShelterService shelterService) {
         this.usersService = usersService;
         this.menuMakerDog = menuMakerDog;
         this.reportUsersService = reportUsersService;
         this.binaryContentFileRepository = binaryContentFileRepository;
         this.reportUsersRepository = reportUsersRepository;
         this.menuMakerCat = menuMakerCat;
+        this.shelterService = shelterService;
     }
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
@@ -129,7 +134,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 telegramBot.execute(new SendMessage(chatId,
                         "Введите данные пользователя в формате \"Имя Фамилия Телефон Почта (через пробел)\""));
             } else if (data.equals(MenuDogDescription.AboutPetShelterDocx.name())) {
-                AboutTheNursery(chatId);
+                aboutTheShelter(chatId);
             } else if (data.equals(MenuDogDescription.SCHEDULE.name())) {
                 sendLocationPhoto(chatId);
             } else if (data.equals(MenuDogDescription.VOLUNTEERCALL.name())) {
@@ -220,7 +225,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
             if (data.equals(MenuCatDescription.AboutCatPetShelterDocx.name())) {
-                aboutCatNursery(chatId);
+                aboutTheShelter(chatId);
             } else if (data.equals(MenuCatDescription.CATNURSERYLOCATION.name())) {
                 sendCatNurseryLocationPhoto(chatId);
             } else if (data.equals(MenuCatDescription.WRITECONTACTSCAT.name())) {
@@ -312,36 +317,22 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.execute(message);
     }
 
-    // Информация о питомнике *считывание информации о питомнике и вывод в чат Bot
-    private void AboutTheNursery(long chatId) {
+    /** <i> Вывод информации о приюте </i> <br>
+     *
+     * @param chatId идентификатор чата
+     *  flagChoosingShelter - флаг выбранного приюта
+     */
+    private void aboutTheShelter(long chatId) {
         String methodName = new Object() {
         }
                 .getClass()
                 .getEnclosingMethod()
                 .getName();
         logger.info("Current Method is - " + methodName);
-        char[] buf = new char[NUMBER_CHARACTERS_READ_FILE_ABOUT_THE_NURSERY];
-        try (FileReader reader = new FileReader(NAME_FILE_ABOUT_THE_NURSERY)) {
-            reader.read(buf);
-        } catch (IOException ex) {
-        }
-        telegramBot.execute(new SendMessage(chatId, new String(buf)));
-    }
 
-    // Информация о питомнике *считывание информации о питомнике и вывод в чат Bot
-    private void aboutCatNursery(long chatId) {
-        String methodName = new Object() {
-        }
-                .getClass()
-                .getEnclosingMethod()
-                .getName();
-        logger.info("Current Method is - " + methodName);
-        char[] buf = new char[NUMBER_CHARACTERS_READ_FILE_ABOUT_THE_NURSERY];
-        try (FileReader reader = new FileReader(NAME_FILE_ABOUT_CAT_NURSERY)) {
-            reader.read(buf);
-        } catch (IOException ex) {
-        }
-        telegramBot.execute(new SendMessage(chatId, new String(buf)));
+        Shelters shelters =new Shelters();
+        shelters=shelterService.getShelter(flagChoosingShelter);
+        telegramBot.execute(new SendMessage(chatId, shelters.getDescriptionShelter()));
     }
 
     /**
