@@ -86,6 +86,7 @@ class DogsServiceTest {
         Dogs dogs1 = mock(Dogs.class);
 
         when(dogs1.getNickname()).thenReturn("");
+
         doNothing().when(dogs1).setAge(anyInt());
         doNothing().when(dogs1).setId((Long) any());
         doNothing().when(dogs1).setInfoDog((String) any());

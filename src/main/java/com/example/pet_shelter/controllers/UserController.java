@@ -24,7 +24,7 @@ public class UserController {
     }
 
     @Operation(
-            summary = "Получение всех пользователей",
+            summary = "Получение списка всех пользователей",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -35,13 +35,13 @@ public class UserController {
                     )
             },tags = "USER"
     )
-    @GetMapping("/getALL")
+    @GetMapping("/getAll")
     public Collection<Users> getAllUsers() {
         return this.usersService.getAllUsers();
     }
 
     @Operation(
-            summary = "Внесение данных о новой пользователе",
+            summary = "Внесение данных о новом пользователе",
             description = "Внесение полных данных пользователя в определённом формате",
             responses = {
                     @ApiResponse(
@@ -63,7 +63,7 @@ public class UserController {
     public Users createUserInDb(@Parameter(
             description = "Полные данные пользователя",
             example = "{firstName: Name, lastName : LastName, userPhoneNumber : +75558804420, userEmail: mail@mail.ru}")
-                            @RequestBody Users user) {
+                                @RequestBody Users user) {
         return this.usersService.createUserInDb(user);
     }
 
@@ -84,10 +84,10 @@ public class UserController {
             },tags = "USER")
 
     @DeleteMapping("/delete/{id}")
-    public Users deleteDog(@Parameter(
+    public Users deleteUser(@Parameter(
             description = "Id пользователя, которого необходимо удалить",
             example = "1")
-                           @PathVariable("id") Long id) {
+                            @PathVariable("id") Long id) {
         return this.usersService.deleteUser(id);
     }
 

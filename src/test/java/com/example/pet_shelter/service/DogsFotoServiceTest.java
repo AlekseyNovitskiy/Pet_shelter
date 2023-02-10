@@ -47,8 +47,7 @@ class DogsFotoServiceTest {
         dogs.setId(11L);
         dogs.setInfoDog("Info Dog");
         dogs.setNickname("Bella");
-        Optional<Dogs> ofResult = Optional.of(dogs);
-        when(dogsRepository.findById((Long) any())).thenReturn(ofResult);
+        when(dogsRepository.findById((Long) any())).thenReturn(Optional.of(dogs));
         assertSame(dogs, dogsFotoService.findDog(11L));
         verify(dogsRepository).findById((Long) any());
     }

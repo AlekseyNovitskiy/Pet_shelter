@@ -1,7 +1,10 @@
 package com.example.pet_shelter.model;
 
+import com.example.pet_shelter.exceptions.DogNullParameterValueException;
+
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.Objects;
 
 @Entity
 @Table(name = "dogs")
@@ -29,7 +32,11 @@ public class Dogs {
     }
 
     public void setId(Long id) {
-        this.id = id;
+        if (id == null) {
+            throw new DogNullParameterValueException("Поле id не может быть null");
+        } else {
+            this.id = id;
+        }
     }
 
     public String getNickname() {
@@ -61,4 +68,16 @@ public class Dogs {
         this.infoDog = infoDog;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Dogs dogs = (Dogs) o;
+        return Objects.equals(id, dogs.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

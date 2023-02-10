@@ -1,211 +1,211 @@
 package com.example.pet_shelter.controllers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
+import com.example.pet_shelter.exceptions.DogNullParameterValueException;
 import com.example.pet_shelter.model.Dogs;
-import com.example.pet_shelter.repository.DogsFotoRepository;
-import com.example.pet_shelter.repository.DogsRepository;
+import com.example.pet_shelter.repository.*;
 import com.example.pet_shelter.service.DogsFotoService;
 import com.example.pet_shelter.service.DogsService;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.Collection;
-
-import java.util.Optional;
-
+import com.example.pet_shelter.service.ReportUsersService;
+import com.example.pet_shelter.service.UsersService;
+import com.pengrad.telegrambot.TelegramBot;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-class DogControllerTest {
+import java.io.ByteArrayInputStream;
+import java.util.Optional;
+
+@WebMvcTest
+public class DogControllerTest {
+
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private DogsRepository repository;
+
+    @MockBean
+    private UsersRepository repositoryUsers;
+
+    @MockBean
+    private DogsFotoRepository repositoryFoto;
+
+    @MockBean
+    private ReportUsersRepository reportUsersRepository;
+
+    @MockBean
+    private TelegramBot bot;
+
+    @MockBean
+    private BinaryContentFileRepository binaryContentFileRepository;
+
+    @SpyBean
+    private DogsService service;
+
+    @SpyBean
+    private UsersService serviceUsers;
+
+    @SpyBean
+    private DogsFotoService fotoServices;
+
+    @SpyBean
+    private ReportUsersService reportUsersService;
+
+    @InjectMocks
+    private DogController controller;
 
     @Test
-    void testGetAllDogs() {
-        DogsRepository dogsRepository = mock(DogsRepository.class);
-        ArrayList<Dogs> dogsList = new ArrayList<>();
-        when(dogsRepository.findAll()).thenReturn(dogsList);
-        DogsService dogsService = new DogsService(dogsRepository);
-        Collection<Dogs> actualAllDogs = (new DogController(dogsService,
-                new DogsFotoService(mock(DogsRepository.class), mock(DogsFotoRepository.class)))).getAllDogs();
-        assertSame(dogsList, actualAllDogs);
-        assertTrue(actualAllDogs.isEmpty());
-        verify(dogsRepository).findAll();
+    public void testCreateDog() throws Exception {
+        String nickname = "Sharik";
+        Long id = 11L;
+        int age = 1;
+        String info = "Info Dog";
+
+        JSONObject dogObject = new JSONObject();
+        dogObject.put("id", id);
+        dogObject.put("nickname", nickname);
+        dogObject.put("age", age);
+        dogObject.put("infoDog", info);
+
+        Dogs dog = new Dogs();
+        dog.setId(id);
+        dog.setNickname(nickname);
+        dog.setAge(age);
+        dog.setInfoDog(info);
+
+
+        when(repository.save(any(Dogs.class))).thenReturn(dog);
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(dog));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/dogs/create")
+                        .content(dogObject.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.nickname").value(nickname))
+                .andExpect(jsonPath("$.age").value(age))
+                .andExpect(jsonPath("$.infoDog").value(info));
+
     }
 
     @Test
-    void testGetAllDogs3() {
+    public void testCreateDog2() {
+        String nickname = "";
+        Long id = 11L;
+        int age = 1;
+        String info = "Info Dog";
 
-        DogsService dogsService = mock(DogsService.class);
-        ArrayList<Dogs> dogsList = new ArrayList<>();
-        when(dogsService.getAllDogs()).thenReturn(dogsList);
-        Collection<Dogs> actualAllDogs = (new DogController(dogsService,
-                new DogsFotoService(mock(DogsRepository.class), mock(DogsFotoRepository.class)))).getAllDogs();
-        assertSame(dogsList, actualAllDogs);
-        assertTrue(actualAllDogs.isEmpty());
-        verify(dogsService).getAllDogs();
+        Dogs dog = new Dogs();
+        dog.setId(id);
+        dog.setNickname(nickname);
+        dog.setAge(age);
+        dog.setInfoDog(info);
+
+        when(repository.save(any(Dogs.class))).thenReturn(dog);
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(dog));
+
+        assertThrows(DogNullParameterValueException.class, () -> service.createDogInDB(dog));
     }
 
 
     @Test
-    void testCreateDog() {
+    public void testDeleteDog() throws Exception {
+        String nickname = "Sharik";
+        Long id = 11L;
+        int age = 1;
+        String info = "Info Dog";
 
-        Dogs dogs = new Dogs();
-        dogs.setAge(1);
-        dogs.setId(11L);
-        dogs.setInfoDog("Info Dog");
-        dogs.setNickname("Sharik");
-        DogsRepository dogsRepository = mock(DogsRepository.class);
-        when(dogsRepository.save((Dogs) any())).thenReturn(dogs);
-        DogsService dogsService = new DogsService(dogsRepository);
-        DogController dogController = new DogController(dogsService,
-                new DogsFotoService(mock(DogsRepository.class), mock(DogsFotoRepository.class)));
+        JSONObject dogObject = new JSONObject();
+        dogObject.put("id", id);
+        dogObject.put("nickname", nickname);
+        dogObject.put("age", age);
+        dogObject.put("infoDog", info);
 
-        Dogs dogs1 = new Dogs();
-        dogs1.setAge(1);
-        dogs1.setId(11L);
-        dogs1.setInfoDog("Info Dog");
-        dogs1.setNickname("Sharik");
-        assertSame(dogs, dogController.createDog(dogs1));
-        verify(dogsRepository).save((Dogs) any());
-    }
+        Dogs dog = new Dogs();
+        dog.setId(id);
+        dog.setNickname(nickname);
+        dog.setAge(age);
+        dog.setInfoDog(info);
 
-    @Test
-    void testCreateDog2() {
+        when(repository.save(any(Dogs.class))).thenReturn(dog);
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(dog));
+        doNothing().when(repository).deleteById(any());
 
-        Dogs dogs = new Dogs();
-        dogs.setAge(1);
-        dogs.setId(11L);
-        dogs.setInfoDog("Info Dog");
-        dogs.setNickname("Sharik");
-        DogsService dogsService = mock(DogsService.class);
-        when(dogsService.createDogInDB((Dogs) any())).thenReturn(dogs);
-        DogController dogController = new DogController(dogsService,
-                new DogsFotoService(mock(DogsRepository.class),
-                        mock(DogsFotoRepository.class)));
-
-        Dogs dogs1 = new Dogs();
-        dogs1.setAge(1);
-        dogs1.setId(11L);
-        dogs1.setInfoDog("Info Dog");
-        dogs1.setNickname("Sharik");
-        assertSame(dogs, dogController.createDog(dogs1));
-        verify(dogsService).createDogInDB((Dogs) any());
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/dogs/delete/" + 5L)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(content().string(
+                        "{\"id\":11,\"nickname\":\"Sharik\",\"age\":1,\"infoDog\":\"Info Dog\"}"));
     }
 
 
     @Test
-    void testDeleteDog() {
-        Dogs dogs = new Dogs();
-        dogs.setAge(1);
-        dogs.setId(11L);
-        dogs.setInfoDog("Info Dog");
-        dogs.setNickname("Sharik");
+    public void testUpdateDog() throws Exception {
+        String nickname = "Sharik";
+        Long id = 11L;
+        int age = -1;
+        String info = "Info Dog";
 
-        DogsRepository dogsRepository = mock(DogsRepository.class);
-        when(dogsRepository.findById((Long) any())).thenReturn(Optional.of(dogs));
-        doNothing().when(dogsRepository).deleteById((Long) any());
-        DogsService dogsService = new DogsService(dogsRepository);
-        assertSame(dogs, (
-                new DogController(dogsService,
-                        new DogsFotoService(mock(DogsRepository.class),
-                                mock(DogsFotoRepository.class)))).
-                deleteDog(11L));
+        JSONObject dogObject = new JSONObject();
+        dogObject.put("id", id);
+        dogObject.put("nickname", nickname);
+        dogObject.put("age", age);
+        dogObject.put("infoDog", info);
 
-        verify(dogsRepository).findById((Long) any());
-        verify(dogsRepository).deleteById((Long) any());
+        Dogs dog = new Dogs();
+        dog.setId(id);
+        dog.setNickname(nickname);
+        dog.setAge(age);
+        dog.setInfoDog(info);
+
+        when(repository.save(any(Dogs.class))).thenReturn(dog);
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(dog));
+
+        Dogs dog2 = new Dogs();
+        dog.setId(1L);
+        dog.setNickname("Sharik");
+        dog.setAge(5);
+        dog.setInfoDog("Info Dog");
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/dogs/update/" + id, dog)
+                        .content(dogObject.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string
+                        ("{\"id\":1,\"nickname\":\"Sharik\",\"age\":1,\"infoDog\":\"Info Dog\"}"));
+
     }
 
     @Test
-    void testDeleteDog2() {
-        Dogs dogs = new Dogs();
-        dogs.setAge(1);
-        dogs.setId(11L);
-        dogs.setInfoDog("Info Dog");
-        dogs.setNickname("Sharik");
-        DogsService dogsService = mock(DogsService.class);
-        when(dogsService.deleteDog((Long) any())).thenReturn(dogs);
-        assertSame(dogs, (new DogController(dogsService,
-                new DogsFotoService(mock(DogsRepository.class), mock(DogsFotoRepository.class)))).deleteDog(11L));
-        verify(dogsService).deleteDog((Long) any());
-    }
-
-    @Test
-    void testUpdateDog() {
-        Dogs dogs = new Dogs();
-        dogs.setAge(1);
-        dogs.setId(11L);
-        dogs.setInfoDog("Info Dog");
-        dogs.setNickname("Sharik");
-        Optional<Dogs> ofResult = Optional.of(dogs);
-
-        Dogs dogs1 = new Dogs();
-        dogs1.setAge(1);
-        dogs1.setId(11L);
-        dogs1.setInfoDog("Info Dog");
-        dogs1.setNickname("Sharik");
-        DogsRepository dogsRepository = mock(DogsRepository.class);
-        when(dogsRepository.save((Dogs) any())).thenReturn(dogs1);
-        when(dogsRepository.findById((Long) any())).thenReturn(ofResult);
-        DogsService dogsService = new DogsService(dogsRepository);
-        DogController dogController = new DogController(dogsService,
-                new DogsFotoService(mock(DogsRepository.class), mock(DogsFotoRepository.class)));
-
-        Dogs dogs2 = new Dogs();
-        dogs2.setAge(1);
-        dogs2.setId(11L);
-        dogs2.setInfoDog("Info Dog");
-        dogs2.setNickname("Sharik");
-        assertSame(dogs1, dogController.updateDog(11L, dogs2));
-        verify(dogsRepository).save((Dogs) any());
-        verify(dogsRepository).findById((Long) any());
-    }
-
-    @Test
-    void testUpdateDog2() {
-
-        Dogs dogs = new Dogs();
-        dogs.setAge(1);
-        dogs.setId(11L);
-        dogs.setInfoDog("Info Dog");
-        dogs.setNickname("Sharik");
-        DogsService dogsService = mock(DogsService.class);
-        when(dogsService.updateDog((Long) any(), (Dogs) any())).thenReturn(dogs);
-
-        DogController dogController = new DogController(dogsService,
-                new DogsFotoService(mock(DogsRepository.class), mock(DogsFotoRepository.class)));
-
-        Dogs dogs1 = new Dogs();
-        dogs1.setAge(1);
-        dogs1.setId(11L);
-        dogs1.setInfoDog("Info Dog");
-        dogs1.setNickname("Sharik");
-
-        assertSame(dogs, dogController.updateDog(11L, dogs1));
-        verify(dogsService).updateDog((Long) any(), (Dogs) any());
-    }
-
-    @Test
-    void testUploadFotoDog() throws IOException {
-
-        DogsService dogsService = new DogsService(mock(DogsRepository.class));
-        DogController dogController = new DogController(dogsService,
-                new DogsFotoService(mock(DogsRepository.class), mock(DogsFotoRepository.class)));
-        ResponseEntity<String> actualUploadFotoDogResult = dogController.uploadFotoDog(11L,
+    public void testUploadFotoDog() throws Exception {
+        ResponseEntity<String> actualUploadFotoDogResult = controller.uploadFotoDog(11L,
                 new MockMultipartFile("Name", new ByteArrayInputStream("AAAAAAAA".getBytes("UTF-8"))));
+
         assertEquals("Файл большого размера", actualUploadFotoDogResult.getBody());
         assertEquals(HttpStatus.BAD_REQUEST, actualUploadFotoDogResult.getStatusCode());
         assertTrue(actualUploadFotoDogResult.getHeaders().isEmpty());
     }
 }
-
