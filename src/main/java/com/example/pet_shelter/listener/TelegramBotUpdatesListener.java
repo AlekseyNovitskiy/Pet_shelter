@@ -38,6 +38,7 @@ import java.util.List;
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
+    private String startLine;
     private Long flagChoosingShelter; // Флаг выбора приюта
     private final ReportUsersRepository reportUsersRepository;
     private final BinaryContentFileRepository binaryContentFileRepository;
@@ -188,11 +189,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
             if (data.equals(MenuDogDescription.DOGSHELTERENTER.name())) {
-                telegramBot.execute(new SendMessage(chatId, "Вы выбрали собачий приют").replyMarkup(menuMakerDog.afterStartDogKeyBoard()));
+                telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы выбрали собачий приют").replyMarkup(menuMakerDog.afterStartDogKeyBoard()));
             } else if (data.equals(MenuDogDescription.AboutPetShelter.name())) {
-                telegramBot.execute(new SendMessage(chatId, "Вы выбрали пункт выбрать информацию о приюте").replyMarkup(menuMakerDog.menu1Keyboard()));
+                telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы выбрали пункт выбрать информацию о приюте").replyMarkup(menuMakerDog.menu1Keyboard()));
             } else if (data.equals(MenuDogDescription.HOWTOTAKEDOG.name())) {
-                telegramBot.execute(new SendMessage(chatId, "Вы выбрали пункт как взять информацию о питомце").replyMarkup(menuMakerDog.menu2Keyboard()));
+                telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы выбрали пункт как взять информацию о питомце").replyMarkup(menuMakerDog.menu2Keyboard()));
             } else if (data.equals(MenuDogDescription.SENDDOGPHOTO.name())) {
                 telegramBot.execute(new SendMessage(chatId, "Загрузите отчет").replyMarkup(menuMakerDog.menu3Keyboard()));
                 isPhoto = true;
@@ -205,13 +206,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
             if (data.equals(MenuDogDescription.CATSHELTERENTER.name())) {
-                telegramBot.execute(new SendMessage(chatId, "Вы выбрали кошачий приют").replyMarkup(menuMakerCat.afterStartCatKeyBoard()));
+                telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы выбрали кошачий приют").replyMarkup(menuMakerCat.afterStartCatKeyBoard()));
             } else if (data.equals(MenuCatDescription.AboutCatPetShelter.name())) {
-                telegramBot.execute(new SendMessage(chatId, "Вы выбрали раздел о приюте").replyMarkup(menuMakerCat.menu1KeyboardCat()));
+                telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы выбрали раздел о приюте").replyMarkup(menuMakerCat.menu1KeyboardCat()));
             } else if (data.equals(MenuCatDescription.CatVolunteer.name())) {
                 telegramBot.execute(new SendMessage(chatId, "Волонтер позван"));
             } else if (data.equals(MenuCatDescription.HOWTOTAKECAT.name())) {
-                telegramBot.execute(new SendMessage(chatId, "Вы выбрали раздел как взять животное").replyMarkup(menuMakerCat.menu2KeyboardCat()));
+                telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы выбрали раздел как взять животное").replyMarkup(menuMakerCat.menu2KeyboardCat()));
             } else if (data.equals(MenuCatDescription.SENDPETREPORT.name())) {
                 telegramBot.execute(new SendMessage(chatId, "Загрузите отчет").replyMarkup(menuMakerDog.menu3Keyboard()));
                 isPhoto = true;
@@ -240,7 +241,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
             if (data.equals(MenuCatDescription.CATDOCUMENTS.name())) {
-                telegramBot.execute(new SendMessage(chatId, "Вы выбрали списки документов:").replyMarkup(menuMakerCat.inlineCatButtonsListOfRules(chatId)));
+                telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы выбрали списки документов:").replyMarkup(menuMakerCat.inlineCatButtonsListOfRules(chatId)));
             }
         }
     }
@@ -279,10 +280,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         } else {
             switch (userMessage) {
                 case "/start":
-                    telegramBot.execute(new SendMessage(chatId, "Какое-то приветственное сообщение, Выберите приют").replyMarkup(menuMakerDog.startMenuKeyboard()));
+                    startLine=greetings(chatId,update);
+                    telegramBot.execute(new SendMessage(chatId, startLine+", Выберите приют").replyMarkup(menuMakerDog.startMenuKeyboard()));
                     break;
                 default:
-                    telegramBot.execute(new SendMessage(chatId, "Вы ввели что-то странное!"));
+                    telegramBot.execute(new SendMessage(chatId, startLine+ ", Вы ввели что-то странное!"));
             }
         }
     }
@@ -294,12 +296,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * @param update апдейт
      * @see com.pengrad.telegrambot.request.SendMessage
      */
-    public void greetings(Long chatId, Update update) {
+    public String greetings(Long chatId, Update update) {
         String firstName = update.message().chat().firstName();
         String lastName = update.message().chat().lastName();
-        telegramBot.execute(new SendMessage(chatId, "Привет " + firstName + " " + lastName));
+        return firstName + " " + lastName;
     }
-
     /**
      * <i>Кнопка меню бота</i>
      *
