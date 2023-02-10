@@ -33,7 +33,7 @@ public class UserController {
                                     array = @ArraySchema(schema = @Schema(implementation = Users.class))
                             )
                     )
-            }
+            },tags = "USER"
     )
     @GetMapping("/getAll")
     public Collection<Users> getAllUsers() {
@@ -58,7 +58,7 @@ public class UserController {
                             responseCode = "400",
                             description = "Ошибка при внесении пользователя в базу из-за неверного формата данных"
                     )
-            })
+            },tags = "USER")
     @PostMapping("/create")
     public Users createUserInDb(@Parameter(
             description = "Полные данные пользователя",
@@ -81,7 +81,8 @@ public class UserController {
                             responseCode = "500",
                             description = "Пользователь не найден в базе"
                     )
-            })
+            },tags = "USER")
+
     @DeleteMapping("/delete/{id}")
     public Users deleteUser(@Parameter(
             description = "Id пользователя, которого необходимо удалить",
@@ -108,7 +109,7 @@ public class UserController {
                     @ApiResponse(
                             responseCode = "400",
                             description = "Ошибка при обновлении объекта users из-за неверного формата данных"
-                    )}
+                    )},tags = "USER"
     )
     @PutMapping("/update/{id}")
     public Users updateUsers(@Parameter(
