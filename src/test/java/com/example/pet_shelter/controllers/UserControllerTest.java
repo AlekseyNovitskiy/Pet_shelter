@@ -1,70 +1,244 @@
 package com.example.pet_shelter.controllers;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
-
 import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.model.Users;
+import com.example.pet_shelter.repository.*;
+import com.example.pet_shelter.service.DogsFotoService;
+import com.example.pet_shelter.service.DogsService;
+import com.example.pet_shelter.service.ReportUsersService;
 import com.example.pet_shelter.service.UsersService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pengrad.telegrambot.TelegramBot;
+import org.json.JSONObject;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
-@ContextConfiguration(classes = {UserController.class})
-@ExtendWith(SpringExtension.class)
-class UserControllerTest {
+
+@WebMvcTest
+public class UserControllerTest {
+
     @Autowired
-    private UserController userController;
+    private MockMvc mockMvc;
 
     @MockBean
-    private UsersService usersService;
+    private DogsRepository repositoryDog;
+
+    @MockBean
+    private UsersRepository repository;
+
+    @MockBean
+    private DogsFotoRepository repositoryFoto;
+
+    @MockBean
+    private ReportUsersRepository reportUsersRepository;
+
+    @MockBean
+    private TelegramBot bot;
+
+    @MockBean
+    private BinaryContentFileRepository binaryContentFileRepository;
+
+    @SpyBean
+    private DogsService serviceDog;
+
+    @MockBean
+    private UsersService service;
+
+    @SpyBean
+    private DogsFotoService fotoServices;
+
+    @SpyBean
+    private ReportUsersService reportUsersService;
+
+    @InjectMocks
+    private UserController controller;
 
     @Test
-    void testGetAllUsers() throws Exception {
-        when(usersService.getAllUsers()).thenReturn(new ArrayList<>());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/user/getALL");
-        MockMvcBuilders.standaloneSetup(userController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("[]"));
+    public void testGetAllUsers() throws Exception {
+        when(service.getAllUsers()).thenReturn(new ArrayList<>());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/user/getAll")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("[]"));
     }
 
-
     @Test
-    void testGetAllUsers2() throws Exception {
-        when(usersService.getAllUsers()).thenReturn(new ArrayList<>());
-        MockHttpServletRequestBuilder getResult = MockMvcRequestBuilders.get("/user/getALL");
-        getResult.characterEncoding("Encoding");
-        MockMvcBuilders.standaloneSetup(userController)
-                .build()
-                .perform(getResult)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("[]"));
+    public void testGetAllUsers2() throws Exception {
+        when(service.getAllUsers()).thenReturn(new ArrayList<>());
+
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/user/getAll")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("Encoding"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("[]"));
     }
 
+    @Test
+    public void testCreateUser() throws Exception {
+        String name = "Jane";
+        Long id = 11L;
+        String lastName = "Doe";
+        String email = "jane.doe@example.org";
+        String phoneNumber = "4105551212";
+
+        JSONObject userObject = new JSONObject();
+        userObject.put("id", id);
+        userObject.put("name", name);
+        userObject.put("lastName", lastName);
+        userObject.put("email", email);
+        userObject.put("phoneNumber", phoneNumber);
+
+        Users users = new Users();
+        users.setFirstName("Jane");
+        users.setId(11L);
+        users.setLastName("Doe");
+        users.setUserEmail("jane.doe@example.org");
+        users.setUserPhoneNumber("4105551212");
+
+        when(service.createUserInDb(any(Users.class))).thenReturn(users);
+        when(repository.save(any(Users.class))).thenReturn(users);
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(users));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/user/create")
+                        .content(userObject.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.firstName").value(name))
+                .andExpect(jsonPath("$.lastName").value(lastName))
+                .andExpect(jsonPath("$.userPhoneNumber").value(phoneNumber))
+                .andExpect(jsonPath("$.userEmail").value(email));
+
+
+    }
 
     @Test
-    void testCreateUser() throws Exception {
+    public void testCreateUser2() throws Exception {
+        String name = "";
+        Long id = 11L;
+        String lastName = "Doe";
+        String email = "jane.doe@example.org";
+        String phoneNumber = "4105551212";
+
+        JSONObject userObject = new JSONObject();
+        userObject.put("id", id);
+        userObject.put("name", name);
+        userObject.put("lastName", lastName);
+        userObject.put("email", email);
+        userObject.put("phoneNumber", phoneNumber);
+
+        Users users = new Users();
+        users.setFirstName(name);
+        users.setId(id);
+        users.setLastName(lastName);
+        users.setUserEmail(email);
+        users.setUserPhoneNumber(phoneNumber);
+
+        when(service.createUserInDb(any(Users.class))).thenReturn(users);
+        when(repository.save(any(Users.class))).thenReturn(users);
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(users));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/user/create")
+                        .content(userObject.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.firstName").value(name))
+                .andExpect(jsonPath("$.lastName").value(lastName))
+                .andExpect(jsonPath("$.userPhoneNumber").value(phoneNumber))
+                .andExpect(jsonPath("$.userEmail").value(email));
+    }
+
+    @Test
+    public void testDeleteUser() throws Exception {
+        String name = "Jane";
+        Long id = 11L;
+        String lastName = "Doe";
+        String email = "jane.doe@example.org";
+        String phoneNumber = "4105551212";
+
         Dogs dogs = new Dogs();
         dogs.setAge(1);
         dogs.setId(11L);
         dogs.setInfoDog("Info Dog");
         dogs.setNickname("Sharik");
+
+        JSONObject userObject = new JSONObject();
+        userObject.put("dogs", dogs);
+        userObject.put("id", id);
+        userObject.put("name", name);
+        userObject.put("lastName", lastName);
+        userObject.put("email", email);
+        userObject.put("phoneNumber", phoneNumber);
+
+        Users users = new Users();
+        users.setDog(dogs);
+        users.setFirstName(name);
+        users.setId(id);
+        users.setLastName(lastName);
+        users.setUserEmail(email);
+        users.setUserPhoneNumber(phoneNumber);
+
+        when(service.deleteUser(any(Long.class))).thenReturn(users);
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(users));
+        doNothing().when(repository).deleteById(any());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/user/delete/" + id)
+                        .content(userObject.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.firstName").value(name))
+                .andExpect(jsonPath("$.lastName").value(lastName))
+                .andExpect(jsonPath("$.userPhoneNumber").value(phoneNumber))
+                .andExpect(jsonPath("$.userEmail").value(email));
+    }
+
+
+    @Test
+    public void testUpdateUser() throws Exception {
+        String name = "Jane";
+        Long id = 11L;
+        String lastName = "Doe";
+        String email = "jane.doe@example.org";
+        String phoneNumber = "4105551212";
+
+        Dogs dogs = new Dogs();
+        dogs.setAge(1);
+        dogs.setId(11L);
+        dogs.setInfoDog("Info Dog");
+        dogs.setNickname("Sharik");
+
+        JSONObject userObject = new JSONObject();
+        userObject.put("dogs", dogs);
+        userObject.put("id", id);
+        userObject.put("name", name);
+        userObject.put("lastName", lastName);
+        userObject.put("email", email);
+        userObject.put("phoneNumber", phoneNumber);
 
         Users users = new Users();
         users.setDog(dogs);
@@ -73,156 +247,26 @@ class UserControllerTest {
         users.setLastName("Doe");
         users.setUserEmail("jane.doe@example.org");
         users.setUserPhoneNumber("4105551212");
-        when(usersService.createUserInDb((Users) any())).thenReturn(users);
 
-        Dogs dogs1 = new Dogs();
-        dogs1.setAge(1);
-        dogs1.setId(11L);
-        dogs1.setInfoDog("Info Dog");
-        dogs1.setNickname("Sharik");
+        when(service.updateUser(any(Long.class), any(Users.class))).thenReturn(users);
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(users));
 
-        Users users1 = new Users();
-        users1.setDog(dogs1);
-        users1.setFirstName("Jane");
-        users1.setId(11L);
-        users1.setLastName("Doe");
-        users1.setUserEmail("jane.doe@example.org");
-        users1.setUserPhoneNumber("4105551212");
-        String content = (new ObjectMapper()).writeValueAsString(users1);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/user/create")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content);
-        MockMvcBuilders.standaloneSetup(userController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"id\":11,\"firstName\":\"Jane\",\"lastName\":\"Doe\",\"userPhoneNumber\":\"4105551212\",\"userEmail\":\"jane.doe"
-                                        + "@example.org\",\"dog\":{\"id\":11,\"nickname\":\"Sharik\",\"age\":1,\"infoDog\":\"Info Dog\"}}"));
-    }
-
-    @Test
-    void testDeleteDog() throws Exception {
-        Dogs dogs = new Dogs();
-        dogs.setAge(1);
-        dogs.setId(11L);
-        dogs.setInfoDog("Info Dog");
-        dogs.setNickname("Sharik");
-
-        Users users = new Users();
+        Users users2 = new Users();
         users.setDog(dogs);
-        users.setFirstName("Jane");
-        users.setId(11L);
-        users.setLastName("Doe");
-        users.setUserEmail("jane.doe@example.org");
-        users.setUserPhoneNumber("4105551212");
-        when(usersService.deleteUser((Long) any())).thenReturn(users);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/user/delete/{id}", 11L);
-        MockMvcBuilders.standaloneSetup(userController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"id\":11,\"firstName\":\"Jane\",\"lastName\":\"Doe\",\"userPhoneNumber\":\"4105551212\",\"userEmail\":\"jane.doe"
-                                        + "@example.org\",\"dog\":{\"id\":11,\"nickname\":\"Sharik\",\"age\":1,\"infoDog\":\"Info Dog\"}}"));
-    }
+        users.setFirstName(name);
+        users.setId(id);
+        users.setLastName(lastName);
+        users.setUserEmail(email);
+        users.setUserPhoneNumber(phoneNumber);
 
-    @Test
-    void testDeleteDog2() throws Exception {
-        Dogs dogs = new Dogs();
-        dogs.setAge(1);
-        dogs.setId(11L);
-        dogs.setInfoDog("Info Dog");
-        dogs.setNickname("Sharik");
-
-        Users users = new Users();
-        users.setDog(dogs);
-        users.setFirstName("Jane");
-        users.setId(11L);
-        users.setLastName("Doe");
-        users.setUserEmail("jane.doe@example.org");
-        users.setUserPhoneNumber("4105551212");
-        when(usersService.updateUser((Long) any(), (Users) any())).thenReturn(users);
-
-        Dogs dogs1 = new Dogs();
-        dogs1.setAge(1);
-        dogs1.setId(11L);
-        dogs1.setInfoDog("Info Dog");
-        dogs1.setNickname("Sharik");
-
-        Users users1 = new Users();
-        users1.setDog(dogs1);
-        users1.setFirstName("Jane");
-        users1.setId(11L);
-        users1.setLastName("Doe");
-        users1.setUserEmail("jane.doe@example.org");
-        users1.setUserPhoneNumber("4105551212");
-        String content = (new ObjectMapper()).writeValueAsString(users1);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(
-                "/user/update/dog/{id}", 11L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content);
-        MockMvcBuilders.standaloneSetup(userController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"id\":11,\"firstName\":\"Jane\",\"lastName\":\"Doe\",\"userPhoneNumber\":\"4105551212\",\"userEmail\":\"jane.doe"
-                                        + "@example.org\",\"dog\":{\"id\":11,\"nickname\":\"Sharik\",\"age\":1,\"infoDog\":\"Info Dog\"}}"));
-    }
-
-    @Test
-    void testUpdateUsers() throws Exception {
-        Dogs dogs = new Dogs();
-        dogs.setAge(1);
-        dogs.setId(11L);
-        dogs.setInfoDog("Info Dog");
-        dogs.setNickname("Sharik");
-
-        Users users = new Users();
-        users.setDog(dogs);
-        users.setFirstName("Jane");
-        users.setId(11L);
-        users.setLastName("Doe");
-        users.setUserEmail("jane.doe@example.org");
-        users.setUserPhoneNumber("4105551212");
-        when(usersService.updateUser(any(), (Users) any())).thenReturn(users);
-
-        Dogs dogs1 = new Dogs();
-        dogs1.setAge(1);
-        dogs1.setId(11L);
-        dogs1.setInfoDog("Info Dog");
-        dogs1.setNickname("Sharik");
-
-        Users users1 = new Users();
-        users1.setDog(dogs1);
-        users1.setFirstName("Jane");
-        users1.setId(11L);
-        users1.setLastName("Doe");
-        users1.setUserEmail("jane.doe@example.org");
-        users1.setUserPhoneNumber("4105551212");
-
-        String content = (new ObjectMapper()).writeValueAsString(users1);
-
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/user/update/{id}", 11L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content);
-
-        MockMvcBuilders.standaloneSetup(userController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"id\":11,\"firstName\":\"Jane\",\"lastName\":\"Doe\",\"userPhoneNumber\":\"4105551212\",\"userEmail\":\"jane.doe"
-                                        + "@example.org\",\"dog\":{\"id\":11,\"nickname\":\"Sharik\",\"age\":1,\"infoDog\":\"Info Dog\"}}"));
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/user/update/" + id, users2)
+                        .content(userObject.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(
+                        "{\"id\":11,\"firstName\":\"Jane\",\"lastName\":\"Doe\",\"userPhoneNumber\":\"4105551212\",\"userEmail\":\"jane.doe"
+                                + "@example.org\",\"dog\":{\"id\":11,\"nickname\":\"Sharik\",\"age\":1,\"infoDog\":\"Info Dog\"}}"));
     }
 }
-

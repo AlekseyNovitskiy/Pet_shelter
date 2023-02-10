@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 @Service
 public class UsersService {
 
-    private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
     private final UsersRepository usersRepository;
 
@@ -165,7 +165,7 @@ public class UsersService {
      * @see java.util.regex.Pattern
      * @see java.util.regex.Matcher
      */
-    public boolean patternMatches(String TheStringBeingChecked, String regexPattern) {
+    public static boolean patternMatches(String TheStringBeingChecked, String regexPattern) {
         String methodName = new Object() {
         }
                 .getClass()

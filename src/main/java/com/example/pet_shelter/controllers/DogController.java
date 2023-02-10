@@ -15,13 +15,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 
 @RestController
 @RequestMapping("/dogs")
@@ -38,18 +38,15 @@ public class DogController {
         this.dogsFotoService = dogsFotoService;
     }
 
-    @Operation(summary = "Внесение данных о новой питомце\"",
+    @Operation(summary = "Внесение данных о новой питомце",
             responses = {@ApiResponse(
                     responseCode = "200",
                     description = "Информация о питомце занесена",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = Dogs.class))
-                    ))},tags = "DOG")
-
-    // Внесение данных о новой собаке
-    @PostMapping("/create")   // Создание новой записи о собаке
-
+                    ))}, tags = "DOG")
+    @PostMapping("/create")
     public Dogs createDog(@RequestBody Dogs dog) {
         return this.dogsService.createDogInDB(dog);
     }
@@ -61,8 +58,7 @@ public class DogController {
                     description = "Информация о питомце удалена",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE
-                    ))},tags = "DOG")
-    // Удаление информации о собаке
+                    ))}, tags = "DOG")
     @DeleteMapping("/delete/{id}")
     public Dogs deleteDog(@Parameter(description = "Id питомца", example = "1") @PathVariable("id") Long id) {
         return this.dogsService.deleteDog(id);
@@ -75,10 +71,9 @@ public class DogController {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = Dogs.class))
-                    ))},tags = "DOG")
-    // Изменение информации о собаке
+                    ))}, tags = "DOG")
     @PutMapping("/update/{id}")
-    public Dogs deleteDog(@Parameter(description = "Id питомца", example = "1") @PathVariable("id") Long id, @RequestBody Dogs dog) {
+    public Dogs updateDog(@Parameter(description = "Id питомца", example = "1") @PathVariable("id") Long id, @RequestBody Dogs dog) {
         return this.dogsService.updateDog(id, dog);
     }
 
@@ -88,9 +83,7 @@ public class DogController {
                     description = "Фотография загружена",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE
-                    ))},tags = "DOG")
-
-    // Загрузка фотографии собаки
+                    ))}, tags = "DOG")
     @PostMapping(value = "/{id}/load/fotoDog", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     // Прикрепление фото собаки
     public ResponseEntity<String> uploadFotoDog(@Parameter(description = "Id питомца", example = "1") @PathVariable Long id, @Parameter(description = "Путь к фотографии") @RequestParam MultipartFile fotoDog) throws
@@ -110,8 +103,7 @@ public class DogController {
                     description = "Фотография найдена",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE
-                    ))},tags = "DOG")
-    // Просмотр фотографии собаки
+                    ))}, tags = "DOG")
     @GetMapping(value = "/{id}/fotoDog")
     public void downloadFotoDog(@Parameter(description = "Id питомца", example = "1") @PathVariable Long id, HttpServletResponse response) throws IOException {
         DogsFoto dogsFoto = dogsFotoService.findFotoDog(id);

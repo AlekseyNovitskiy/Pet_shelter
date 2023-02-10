@@ -35,7 +35,6 @@ public class ReportUserController {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE
                     ))}, tags = "REPORT")
-    // Просмотр фотографии питомца
     @GetMapping(value = "/{id}/reportUser")
     public void downloadReportUser(@Parameter(description = "Id питомца", example = "1") @PathVariable Long id, HttpServletResponse response) throws IOException {
         ReportUsers reportUsers = reportUsersService.findReportUsers(id);
