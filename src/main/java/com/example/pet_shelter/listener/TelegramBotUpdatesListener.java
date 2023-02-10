@@ -4,10 +4,12 @@ import com.example.pet_shelter.MenuMaker.MenuMaker;
 import com.example.pet_shelter.configuration.MenuDescription;
 import com.example.pet_shelter.exceptions.UsersNullParameterValueException;
 import com.example.pet_shelter.model.ReportUsers;
+import com.example.pet_shelter.model.Shelters;
 import com.example.pet_shelter.model.Users;
 import com.example.pet_shelter.repository.BinaryContentFileRepository;
 import com.example.pet_shelter.repository.ReportUsersRepository;
 import com.example.pet_shelter.service.ReportUsersService;
+import com.example.pet_shelter.service.ShelterService;
 import com.example.pet_shelter.service.UsersService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.PostConstruct;
 import java.io.*;
 import java.io.File;
@@ -33,20 +36,23 @@ import java.util.List;
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
+    private Long flagChoosingShelter; // Флаг выбора приюта
     private final ReportUsersRepository reportUsersRepository;
     private final BinaryContentFileRepository binaryContentFileRepository;
     private final UsersService usersService;
     private final MenuMaker menuMaker;
     private final ReportUsersService reportUsersService;
+    private  final ShelterService shelterService;
 
     public TelegramBotUpdatesListener(UsersService usersService, MenuMaker menuMaker, ReportUsersService reportUsersService,
                                       BinaryContentFileRepository binaryContentFileRepository,
-                                      ReportUsersRepository reportUsersRepository) {
+                                      ReportUsersRepository reportUsersRepository, ShelterService shelterService) {
         this.usersService = usersService;
         this.menuMaker = menuMaker;
         this.reportUsersService = reportUsersService;
         this.binaryContentFileRepository = binaryContentFileRepository;
         this.reportUsersRepository = reportUsersRepository;
+        this.shelterService = shelterService;
     }
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
@@ -85,11 +91,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     logger.info("Processing update: {}", update);
                     if (update.message() != null && update.message().text() != null || update.message() != null && update.message().photo() != null) {
                         Long chatId = update.message().chat().id();
-                            processUpdate(chatId, update);
+                        processUpdate(chatId, update);
                     }
                     if (update.callbackQuery() != null) {
                         Long chatId = update.callbackQuery().message().chat().id();
-                        startMenuDogs(chatId,update);
+                        startMenuDogs(chatId, update);
                         callBackUpdateMenu1(chatId, update);
                         callBackUpdateMenu2(chatId, update);
 //                        callBackUpdateMenu3(chatId, update);
@@ -191,16 +197,17 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         CallbackQuery callbackQuery = update.callbackQuery();
         if (update.callbackQuery() != null) {
             String data = callbackQuery.data();
-             if (data.equals(MenuDescription.DOGSHELTERENTER.name())) {
-                telegramBot.execute(new SendMessage(chatId,"Вы выбрали собачий приют").replyMarkup(menuMaker.afterStartDogKeyBoard()));
+            if (data.equals(MenuDescription.DOGSHELTERENTER.name())) {
+                flagChoosingShelter = 1L; // Флаг выбора приюта
+                telegramBot.execute(new SendMessage(chatId, "Вы выбрали собачий приют").replyMarkup(menuMaker.afterStartDogKeyBoard()));
             } else if (data.equals(MenuDescription.AboutPetShelter.name())) {
-                 telegramBot.execute(new SendMessage(chatId, "Вы выбрали пункт выбрать информацию о приюте").replyMarkup(menuMaker.menu1Keyboard()));
-             } else if (data.equals(MenuDescription.HOWTOTAKEDOG.name())) {
-                 telegramBot.execute(new SendMessage(chatId, "Вы выбрали пункт как взять информацию о питомце").replyMarkup(menuMaker.menu2Keyboard()));
-             } else if (data.equals(MenuDescription.SENDDOGPHOTO.name())) {
-                 telegramBot.execute(new SendMessage(chatId, "Загрузите отчет").replyMarkup(menuMaker.menu3Keyboard()));
-                 isPhoto = true;
-             }
+                telegramBot.execute(new SendMessage(chatId, "Вы выбрали пункт выбрать информацию о приюте").replyMarkup(menuMaker.menu1Keyboard()));
+            } else if (data.equals(MenuDescription.HOWTOTAKEDOG.name())) {
+                telegramBot.execute(new SendMessage(chatId, "Вы выбрали пункт как взять информацию о питомце").replyMarkup(menuMaker.menu2Keyboard()));
+            } else if (data.equals(MenuDescription.SENDDOGPHOTO.name())) {
+                telegramBot.execute(new SendMessage(chatId, "Загрузите отчет").replyMarkup(menuMaker.menu3Keyboard()));
+                isPhoto = true;
+            }
         }
     }
 
@@ -264,6 +271,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         }
     }
 
+
     /**
      * <i>Приветственное сообщение пользователя в чате</i>
      *
@@ -276,6 +284,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         String lastName = update.message().chat().lastName();
         telegramBot.execute(new SendMessage(chatId, "Привет " + firstName + " " + lastName));
     }
+
 
     /**
      * <i>Кнопка меню бота</i>
@@ -293,7 +302,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.execute(message);
     }
 
-    // Информация о питомнике *считывание информации о питомнике и вывод в чат Bot
+
+    /** <i> Вывод информации о приюте </i> <br>
+     *
+     * @param chatId идентификатор чата
+     *  flagChoosingShelter - флаг выбранного приюта
+     */
     private void AboutTheNursery(long chatId) {
         String methodName = new Object() {
         }
@@ -301,13 +315,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 .getEnclosingMethod()
                 .getName();
         logger.info("Current Method is - " + methodName);
-        char[] buf = new char[NUMBER_CHARACTERS_READ_FILE_ABOUT_THE_NURSERY];
-        try (FileReader reader = new FileReader(NAME_FILE_ABOUT_THE_NURSERY)) {
-            reader.read(buf);
-        } catch (IOException ex) {
-        }
-        telegramBot.execute(new SendMessage(chatId, new String(buf)));
+
+        Shelters shelters =new Shelters();
+        shelters=shelterService.getShelter(flagChoosingShelter);
+        telegramBot.execute(new SendMessage(chatId, shelters.getDescriptionShelter()));
     }
+
 
     /**
      * <i>Высылает в чат сообщение с текстом, сообщение с изображением карты, навигацию по карте</i> <br>
@@ -334,6 +347,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.execute(location);
     }
 
+
     /**
      * <i>Высылает в чат документ</i>
      * <br>
@@ -354,6 +368,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         java.io.File file = new File("Документы, чтобы взять собаку.docx");
         telegramBot.execute(new SendDocument(chatId, file));
     }
+
 
     /**
      * <i>Добавление нового пользователя, полученного через Telegram Bot</i>
@@ -379,10 +394,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         usersService.createUserInDb(user);
     }
 
+
     /**
      * Фоновое приложение для поиска User с не сданными отчетами
      */
-    @Scheduled(fixedDelay = 1_000L*60*60*24) // Раз в сутки
+    @Scheduled(fixedDelay = 1_000L * 60 * 60 * 24) // Раз в сутки
     public void run() {
         String methodName = new Object() {
         }
@@ -400,19 +416,16 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             LocalDate date1 = reportUsersList.get(i).getTime();
             Period period = Period.between(date, date1); // Вычисление промежутка между датами
             long chatId = reportUsersList.get(i).getChatId();
-            if (period.getDays()==1) {
+            if (period.getDays() == 1) {
                 String str = "Уважаемый владелец! Спасибо за вовремя сданный отчет!";
                 SendResponse response = telegramBot.execute(new SendMessage(chatId, str));
-            }
-            else if (period.getDays()>31 && period.getDays()< 46) {
+            } else if (period.getDays() > 31 && period.getDays() < 46) {
                 String str = "Уважаемый владелец! У вас идет испытательный срок!";
                 SendResponse response = telegramBot.execute(new SendMessage(chatId, str));
-            }
-            else if (period.getDays()>46) {
+            } else if (period.getDays() > 46) {
                 String str = "Уважаемый владелец! У вас идет прошел испытательный срок! Необходимо вернуть питомца.";
                 SendResponse response = telegramBot.execute(new SendMessage(chatId, str));
-            }
-            else if (date.equals(date1) || period.getDays()>31) {
+            } else if (date.equals(date1) || period.getDays() > 31) {
                 String str = "Уважаемый владелец! пришлите отчет о питомце. Спасибо!";
                 SendResponse response = telegramBot.execute(new SendMessage(chatId, str));
             }

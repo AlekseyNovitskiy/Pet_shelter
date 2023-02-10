@@ -41,7 +41,7 @@ public class UserController {
     }
 
     @Operation(
-            summary = "Внесение данных о новой пользователе",
+            summary = "Внесение данных о новом пользователе",
             description = "Внесение полных данных пользователя в определённом формате",
             responses = {
                     @ApiResponse(
