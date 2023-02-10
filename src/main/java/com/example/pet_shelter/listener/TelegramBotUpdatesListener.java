@@ -287,7 +287,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
 
     /**
-     * <i>Кнопка меню бота</i>
+     * <i> Кнопка меню бота</i>
      *
      * @see com.pengrad.telegrambot.model.BotCommand
      * @see com.pengrad.telegrambot.request.SetMyCommands
