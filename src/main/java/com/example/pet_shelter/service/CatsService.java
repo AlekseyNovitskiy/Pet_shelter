@@ -27,7 +27,7 @@ public class CatsService {
 
     /**
      * <i>Заносит в базу созданный объект питомца.
-     * Если объект пуст будует выкинуто исключение CatNullParameterValueException.</i>
+     * Если объект пуст будет выкинуто исключение CatNullParameterValueException.</i>
      *
      * @param cat объект питомца
      * @see CatsRepository
@@ -66,7 +66,7 @@ public class CatsService {
     /**
      * <i>Заменяет старые параметры питомца на те что были переданы.
      * Если объект по id не найден будет выкинуто исключение CatNullParameterValueException.
-     * При отсутсвии одного из полей у передаваемого объекта cat будет выкинуто исключение NullPointerException.
+     * При отсутствии одного из полей у передаваемого объекта cat будет выкинуто исключение NullPointerException.
      * </i>
      *
      * @param id  Id питомца в базе данных
