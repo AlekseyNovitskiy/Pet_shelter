@@ -43,7 +43,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final BinaryContentFileRepository binaryContentFileRepository;
     private final UsersService usersService;
     private final MenuMakerDog menuMakerDog;
-
     private final MenuMakerCat menuMakerCat;
     private final ReportUsersService reportUsersService;
     private  final ShelterService shelterService;
