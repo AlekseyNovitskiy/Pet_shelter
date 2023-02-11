@@ -42,7 +42,7 @@ public class CatsFotoService {
      * @param file считываемый файл
      * @throws IOException - может возникнуть исключение ввода/вывода
      */
-    public void uploadFotoCat(Long id, MultipartFile file) throws IOException {
+    public CatsFoto uploadFotoCat(Long id, MultipartFile file) throws IOException {
         String methodName = new Object() {
         }
                 .getClass()
@@ -67,7 +67,7 @@ public class CatsFotoService {
         catsFoto.setFileSize(file.getSize());
         catsFoto.setMediaType(file.getContentType());
         catsFoto.setFotoCat(file.getBytes());
-        catsFotoRepository.save(catsFoto);
+        return catsFotoRepository.save(catsFoto);
     }
 
     /**
@@ -75,7 +75,7 @@ public class CatsFotoService {
      *
      * @return Возвращает имя файла
      */
-    private String getExtensions(String fileName) {
+    public String getExtensions(String fileName) {
         String methodName = new Object() {
         }
                 .getClass()
