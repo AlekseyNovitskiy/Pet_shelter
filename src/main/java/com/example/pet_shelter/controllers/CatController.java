@@ -46,8 +46,6 @@ public class CatController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = Cats.class))
                     ))}, tags = "CAT")
-
-    // Внесение данных о новом питомце
     @PostMapping("/create")   // Создание новой записи о питомце
     public Cats createCat(@RequestBody Cats cat) {
         return this.catsService.createCatInDB(cat);
@@ -61,7 +59,6 @@ public class CatController {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE
                     ))}, tags = "CAT")
-    // Удаление информации о питомце
     @DeleteMapping("/delete/{id}")
     public Cats deleteCat(@Parameter(description = "Id питомца", example = "1") @PathVariable("id") Long id) {
         return this.catsService.deleteCat(id);

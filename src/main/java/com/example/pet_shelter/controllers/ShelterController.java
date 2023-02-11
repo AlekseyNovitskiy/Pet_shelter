@@ -24,7 +24,6 @@ public class ShelterController {
         this.shelterService = shelterService;
     }
 
-
     @Operation(summary = "Внесение данных о новом приюте\"",
             responses = {@ApiResponse(
                     responseCode = "200",
@@ -37,7 +36,7 @@ public class ShelterController {
     @PostMapping("/create")   // Создание новой записи о приюте
 
     public Shelters createShelter(@RequestBody Shelters shelter) {
-        return this.shelterService.cteateShelter(shelter);
+        return this.shelterService.createShelter(shelter);
     }
 
 
@@ -54,7 +53,6 @@ public class ShelterController {
         return this.shelterService.deleteShelter(id);
     }
 
-
     @Operation(summary = "Изменение данных о приюте",
             responses = {@ApiResponse(
                     responseCode = "200",
@@ -63,7 +61,6 @@ public class ShelterController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = Shelters.class))
                     ))}, tags = "SHELTER")
-
     // Изменение информации о приюте
     @PutMapping("/update/{id}")
     public Shelters updateShelter(@Parameter(description = "Id приютa", example = "1") @PathVariable("id") Long id,
@@ -84,7 +81,7 @@ public class ShelterController {
                     )
             },tags = "SHELTER"
     )
-    @GetMapping("/getALL")
+    @GetMapping("/getAll")
     public Collection<Shelters> getAllShelters() {
         return this.shelterService.getAllShelters();
     }
