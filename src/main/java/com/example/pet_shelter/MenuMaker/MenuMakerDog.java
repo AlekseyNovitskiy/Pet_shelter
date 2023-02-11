@@ -7,7 +7,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MenuMakerDog {
-
+    /**
+     * <i>Стартовая клавиатура выбора приюта</i>
+     *
+     * @return
+     * @see com.pengrad.telegrambot.model.request.InlineKeyboardMarkup
+     * @see com.pengrad.telegrambot.model.request.InlineKeyboardButton
+     * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
+     */
     public InlineKeyboardMarkup startMenuKeyboard() {
         InlineKeyboardButton first = new InlineKeyboardButton("\uD83D\uDC08 Кошачий приют").callbackData(MenuDogDescription.CATSHELTERENTER.name());
         InlineKeyboardButton second = new InlineKeyboardButton("\uD83D\uDC15 Собачий приют ").callbackData(MenuDogDescription.DOGSHELTERENTER.name());
@@ -16,7 +23,14 @@ public class MenuMakerDog {
                 new InlineKeyboardButton[]{second});
         return startKeyboard;
     }
-
+    /**
+     * <i>Клавиатура после выбора приюта собак</i>
+     *
+     * @return
+     * @see com.pengrad.telegrambot.model.request.InlineKeyboardMarkup
+     * @see com.pengrad.telegrambot.model.request.InlineKeyboardButton
+     * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
+     */
     public InlineKeyboardMarkup afterStartDogKeyBoard() {
         InlineKeyboardButton one = new InlineKeyboardButton("Узнать информацию о приюте").callbackData(MenuDogDescription.AboutPetShelter.name());
         InlineKeyboardButton two = new InlineKeyboardButton("Как взять животное из приюта").callbackData(MenuDogDescription.HOWTOTAKEDOG.name());
