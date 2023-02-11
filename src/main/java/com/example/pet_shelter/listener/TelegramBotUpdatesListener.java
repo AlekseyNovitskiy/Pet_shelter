@@ -116,6 +116,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     @Value("${catRefuse}")
     String CAT_REFUSE;
 
+    @Value("${dogShelterNurseryLocation}")
+    String DOG_SHELTER_NURSERY_LOCATION;
+
+    @Value("${catShelterNurseryLocation}")
+    String CAT_SHELTER_NURSERY_LOCATION;
+
     int NUMBER_CHARACTERS = 2048; // Max символов считываемое из файла
 
     @Autowired
@@ -220,7 +226,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     }
 
     /**
-     * <i>Обработка колбэков списка рекомендаций</i>
+     * <i>Обработка колбэков списка рекомендаций собак</i>
      *
      * @param chatId идентификатор чата
      * @param update апдейт
@@ -246,7 +252,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             }
         }
     }
-
+    /**
+     * <i>Обработка колбэков стартового меню собак</i>
+     *
+     * @param chatId идентификатор чата
+     * @param update апдейт
+     * @see com.pengrad.telegrambot.model.CallbackQuery
+     * @see com.pengrad.telegrambot.model.Update
+     */
     private void startMenuDogs(Long chatId, Update update) {
         CallbackQuery callbackQuery = update.callbackQuery();
         if (update.callbackQuery() != null) {
@@ -263,7 +276,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             }
         }
     }
-
+    /**
+     * <i>Обработка колбэков стартового меню кошек</i>
+     *
+     * @param chatId идентификатор чата
+     * @param update апдейт
+     * @see com.pengrad.telegrambot.model.CallbackQuery
+     * @see com.pengrad.telegrambot.model.Update
+     */
     private void startMenuCats(Long chatId, Update update) {
         CallbackQuery callbackQuery = update.callbackQuery();
         if (update.callbackQuery() != null) {
@@ -282,7 +302,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             }
         }
     }
-
+    /**
+     * <i>Обработка колбэков первого меню кошек</i>
+     *
+     * @param chatId идентификатор чата
+     * @param update апдейт
+     * @see com.pengrad.telegrambot.model.CallbackQuery
+     * @see com.pengrad.telegrambot.model.Update
+     */
     private void menu1KeyboardCats(Long chatId, Update update) {
         CallbackQuery callbackQuery = update.callbackQuery();
         if (update.callbackQuery() != null) {
@@ -299,7 +326,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             }
         }
     }
-
+    /**
+     * <i>Обработка колбэков второго меню кошек</i>
+     *
+     * @param chatId идентификатор чата
+     * @param update апдейт
+     * @see com.pengrad.telegrambot.model.CallbackQuery
+     * @see com.pengrad.telegrambot.model.Update
+     */
     private void menu2KeyboardCats(Long chatId, Update update) {
         CallbackQuery callbackQuery = update.callbackQuery();
         if (update.callbackQuery() != null) {
@@ -311,7 +345,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             }
         }
     }
-
+    /**
+     * <i>Обработка колбэков списка рекомендаций кошек</i>
+     *
+     * @param chatId идентификатор чата
+     * @param update апдейт
+     * @see com.pengrad.telegrambot.model.CallbackQuery
+     * @see com.pengrad.telegrambot.model.Update
+     */
     private void listOfDocumentsForCats(Long chatId, Update update) {
         CallbackQuery callbackQuery = update.callbackQuery();
         if (update.callbackQuery() != null) {
@@ -383,7 +424,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * @see com.pengrad.telegrambot.request.SendMessage
      */
     public String greetings(Long chatId, Update update) {
-        String firstName = update.myChatMember().chat().firstName();
+        String firstName = update.message().chat().firstName();
         String lastName = update.message().chat().lastName();
         return firstName + " " + lastName;
     }
@@ -419,7 +460,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.execute(new SendMessage(chatId, shelters.getDescriptionShelter()));
     }
 
-    /**
+    /**Приют для собак<br>
      * <i>Высылает в чат сообщение с текстом, сообщение с изображением карты, навигацию по карте</i> <br>
      *
      * @param chatId идентификатор чата
@@ -436,14 +477,18 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         logger.info("Current Method is - " + methodName);
         float latitude = (float) 59.82225018231752;
         float longitude = (float) 30.178212453672643;
-        telegramBot.execute(new SendMessage(chatId, "Мы работаем по такому графику, наш адрес такой-то"));
-        java.io.File file = new File("src/main/resources/docs/dogLocation.jpg");
+        telegramBot.execute(new SendMessage(chatId, "Мы работаем с 08:00 до 23:00"));
+        java.io.File file = new File(DOG_SHELTER_NURSERY_LOCATION);
         telegramBot.execute(new SendPhoto(chatId, file));
         telegramBot.execute(new SendMessage(chatId, "Или используйте навигатор"));
         SendLocation location = new SendLocation(chatId, latitude, longitude);
         telegramBot.execute(location);
     }
 
+    /** Приют для кошек<br>
+     * <i>Высылает в чат сообщение с текстом, сообщение с изображением карты, навигацию по карте</i> <br>
+     * @param chatId идентификатор чата
+     */
     public void sendCatNurseryLocationPhoto(Long chatId) {
         String methodName = new Object() {
         }
@@ -454,7 +499,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         float latitude = (float) 60.01192431352728;
         float longitude = (float) 29.721648774315117;
         telegramBot.execute(new SendMessage(chatId, "Мы работаем с 08:00 до 22:00"));
-        java.io.File file = new File("src/main/resources/docs/catLocation.jpg");
+        java.io.File file = new File(CAT_SHELTER_NURSERY_LOCATION);
         telegramBot.execute(new SendPhoto(chatId, file));
         telegramBot.execute(new SendMessage(chatId, "Или используйте навигатор"));
         SendLocation location = new SendLocation(chatId, latitude, longitude);
@@ -542,6 +587,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             }
         }
     }
+
+    /**<i>Чтение текстового файла и вывод в чат его содержимое</i>
+     *
+     * @param chatId идентификатор чата
+     * @param bytes макс длина
+     * @param nameOfFile имя файла
+     */
 
     private void fileRead(long chatId, int bytes, String nameOfFile) {
         String methodName = new Object() {

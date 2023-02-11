@@ -8,7 +8,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MenuMakerCat {
-
+    /**
+     * <i>Клавиатура после выбора приюта кошек</i>
+     *
+     * @return
+     * @see com.pengrad.telegrambot.model.request.InlineKeyboardMarkup
+     * @see com.pengrad.telegrambot.model.request.InlineKeyboardButton
+     * @see com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
+     */
     public InlineKeyboardMarkup afterStartCatKeyBoard() {
         InlineKeyboardButton one = new InlineKeyboardButton("Узнать информацию о приюте").callbackData(MenuCatDescription.AboutCatPetShelter.name());
         InlineKeyboardButton two = new InlineKeyboardButton("Как взять животное из приюта").callbackData(MenuCatDescription.HOWTOTAKECAT.name());
