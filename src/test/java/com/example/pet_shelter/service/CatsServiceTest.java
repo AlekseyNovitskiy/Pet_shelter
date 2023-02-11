@@ -12,7 +12,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.pet_shelter.exceptions.CatNullParameterValueException;
-import com.example.pet_shelter.exceptions.DogNullParameterValueException;
 import com.example.pet_shelter.model.Cats;
 import com.example.pet_shelter.repository.CatsRepository;
 
@@ -116,6 +115,7 @@ class CatsServiceTest {
 
         when(catsRepository.findById((Long) any())).thenReturn(Optional.of(cats));
         doNothing().when(catsRepository).deleteById((Long) any());
+
         assertSame(cats, catsService.deleteCat(11L));
         verify(catsRepository).findById((Long) any());
         verify(catsRepository).deleteById((Long) any());

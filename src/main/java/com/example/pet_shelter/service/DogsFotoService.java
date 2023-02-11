@@ -44,7 +44,7 @@ public class DogsFotoService {
      * @param file считываемый файл
      * @throws IOException - может возникнуть исключение ввода/вывода
      */
-    public void uploadFotoDog(Long id, MultipartFile file) throws IOException {
+    public DogsFoto uploadFotoDog(Long id, MultipartFile file) throws IOException {
         String methodName = new Object() {
         }
                 .getClass()
@@ -69,7 +69,7 @@ public class DogsFotoService {
         dogsFoto.setFileSize(file.getSize());
         dogsFoto.setMediaType(file.getContentType());
         dogsFoto.setFotoDog(file.getBytes());
-        dogsFotoRepository.save(dogsFoto);
+        return dogsFotoRepository.save(dogsFoto);
     }
 
     /**
@@ -77,7 +77,7 @@ public class DogsFotoService {
      *
      * @return Возвращает имя файла
      */
-    private String getExtensions(String fileName) {
+    public String getExtensions(String fileName) {
         String methodName = new Object() {
         }
                 .getClass()

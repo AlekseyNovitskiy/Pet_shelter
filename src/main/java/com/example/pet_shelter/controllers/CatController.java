@@ -110,7 +110,6 @@ public class CatController {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE
                     ))}, tags = "CAT")
-    // Просмотр фотографии собаки
     @GetMapping(value = "/{id}/fotoCat")
     public void downloadFotoCat(@Parameter(description = "Id питомца", example = "1") @PathVariable Long id,
                                 HttpServletResponse response) throws IOException {
