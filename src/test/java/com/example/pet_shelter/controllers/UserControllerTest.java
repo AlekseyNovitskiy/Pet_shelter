@@ -3,10 +3,7 @@ package com.example.pet_shelter.controllers;
 import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.model.Users;
 import com.example.pet_shelter.repository.*;
-import com.example.pet_shelter.service.DogsFotoService;
-import com.example.pet_shelter.service.DogsService;
-import com.example.pet_shelter.service.ReportUsersService;
-import com.example.pet_shelter.service.UsersService;
+import com.example.pet_shelter.service.*;
 import com.pengrad.telegrambot.TelegramBot;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -36,13 +33,22 @@ public class UserControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private DogsRepository repositoryDog;
+    private CatsRepository repositoryCats;
+
+    @MockBean
+    private ShelterRepository shelterRepository;
 
     @MockBean
     private UsersRepository repository;
 
     @MockBean
-    private DogsFotoRepository repositoryFoto;
+    private DogsRepository repositoryDogs;
+
+    @MockBean
+    private CatsFotoRepository repositoryFoto;
+
+    @MockBean
+    private DogsFotoRepository repositoryFotoDogs;
 
     @MockBean
     private ReportUsersRepository reportUsersRepository;
@@ -54,13 +60,21 @@ public class UserControllerTest {
     private BinaryContentFileRepository binaryContentFileRepository;
 
     @SpyBean
-    private DogsService serviceDog;
+    private ShelterService shelterService;
+    @SpyBean
+    private CatsService serviceCats;
 
-    @MockBean
+    @SpyBean
     private UsersService service;
 
     @SpyBean
-    private DogsFotoService fotoServices;
+    private DogsService serviceDogs;
+
+    @SpyBean
+    private CatsFotoService fotoServices;
+
+    @SpyBean
+    private DogsFotoService fotoServicesDogs;
 
     @SpyBean
     private ReportUsersService reportUsersService;

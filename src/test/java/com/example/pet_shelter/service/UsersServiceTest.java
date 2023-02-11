@@ -137,6 +137,7 @@ class UsersServiceTest {
         dogs1.setNickname("Sharik");
 
         Users users1 = mock(Users.class);
+
         when(users1.getUserEmail()).thenReturn("foo");
         when(users1.getUserPhoneNumber()).thenReturn("4105551212");
         when(users1.getFirstName()).thenReturn("Jane");

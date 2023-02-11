@@ -9,7 +9,4 @@ import java.util.List;
 
 @Repository
 public interface ShelterRepository extends JpaRepository<Shelters, Long> {
-
-    List<Shelters> getAllBy();
-
 }

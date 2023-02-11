@@ -120,5 +120,4 @@ public class CatsFotoService {
         logger.info("Current Method is - " + methodName);
         return catsFotoRepository.findById(catId).orElseThrow();
     }
-
 }

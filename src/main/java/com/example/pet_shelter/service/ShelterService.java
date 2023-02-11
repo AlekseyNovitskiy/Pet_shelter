@@ -1,13 +1,13 @@
 package com.example.pet_shelter.service;
 
 import com.example.pet_shelter.exceptions.SheltersNullParameterValueException;
-import com.example.pet_shelter.exceptions.UsersNullParameterValueException;
 import com.example.pet_shelter.listener.TelegramBotUpdatesListener;
 import com.example.pet_shelter.model.Shelters;
 import com.example.pet_shelter.repository.ShelterRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
 import java.util.Collection;
 
 @Service
@@ -29,7 +29,7 @@ public class ShelterService {
      * @see com.example.pet_shelter.repository.ShelterRepository
      * @see com.example.pet_shelter.model.Shelters
      */
-    public Shelters cteateShelter(Shelters shelter) {
+    public Shelters createShelter(Shelters shelter) {
         String methodName = new Object() {
         }
                 .getClass()
@@ -56,18 +56,18 @@ public class ShelterService {
                 .getEnclosingMethod()
                 .getName();
         logger.info("Current Method is - " + methodName);
-            Shelters deleteShelter = shelterRepository.findById(id).orElse(null);
+        Shelters deleteShelter = shelterRepository.findById(id).orElse(null);
         shelterRepository.deleteById(id);
         return deleteShelter;
     }
 
     /**
-     * <i>Заменяет старые параметры пользователя на те что были переданы.
-     * Если объект по id не найден будет выкинуто исключение UsersNullParameterValueException.
-     * При отсутсвии одного из полей у передаваемого объекта user будет выкинуто исключение NullPointerException.
+     * <i>Заменяет старые параметры приюта на те что были переданы.
+     * Если объект по id не найден будет выкинуто исключение SheltersNullParameterValueException.
+     * При отсутсвии одного из полей у передаваемого объекта shelter будет выкинуто исключение NullPointerException.
      * </i>
      *
-     * @param id   Id приюта в базе данных
+     * @param id      Id приюта в базе данных
      * @param shelter объект приюта
      * @see com.example.pet_shelter.repository.ShelterRepository
      * @see com.example.pet_shelter.model.Shelters
@@ -86,24 +86,25 @@ public class ShelterService {
             updateShelter.setDescriptionShelter(shelter.getDescriptionShelter());
 
         } else {
-            throw new UsersNullParameterValueException("Недостаточно данных при попытке заменить данные у объекта shelter");
+            throw new SheltersNullParameterValueException("Недостаточно данных при попытке заменить данные у объекта shelter");
         }
         return shelterRepository.save(updateShelter);
 
     }
 
-
     /**
      * <i>Список всех приютов
+     *
      * @see com.example.pet_shelter.repository.ShelterRepository
      * @see com.example.pet_shelter.model.Shelters
      */
     public Collection<Shelters> getAllShelters() {
-            return this.shelterRepository.getAllBy();
+        return this.shelterRepository.findAll();
     }
 
     /**
      * <i>Информация о приюте
+     *
      * @see com.example.pet_shelter.repository.ShelterRepository
      * @see com.example.pet_shelter.model.Shelters
      */

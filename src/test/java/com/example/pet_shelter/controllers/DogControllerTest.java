@@ -4,10 +4,7 @@ package com.example.pet_shelter.controllers;
 import com.example.pet_shelter.exceptions.DogNullParameterValueException;
 import com.example.pet_shelter.model.Dogs;
 import com.example.pet_shelter.repository.*;
-import com.example.pet_shelter.service.DogsFotoService;
-import com.example.pet_shelter.service.DogsService;
-import com.example.pet_shelter.service.ReportUsersService;
-import com.example.pet_shelter.service.UsersService;
+import com.example.pet_shelter.service.*;
 import com.pengrad.telegrambot.TelegramBot;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -39,10 +36,19 @@ public class DogControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private DogsRepository repository;
+    private CatsRepository repositoryCats;
+
+    @MockBean
+    private ShelterRepository shelterRepository;
 
     @MockBean
     private UsersRepository repositoryUsers;
+
+    @MockBean
+    private DogsRepository repository;
+
+    @MockBean
+    private CatsFotoRepository repositoryFotoCats;
 
     @MockBean
     private DogsFotoRepository repositoryFoto;
@@ -57,13 +63,21 @@ public class DogControllerTest {
     private BinaryContentFileRepository binaryContentFileRepository;
 
     @SpyBean
-    private DogsService service;
+    private ShelterService shelterService;
+    @SpyBean
+    private CatsService serviceCats;
 
     @SpyBean
     private UsersService serviceUsers;
 
     @SpyBean
-    private DogsFotoService fotoServices;
+    private DogsService service;
+
+    @SpyBean
+    private CatsFotoService fotoServices;
+
+    @SpyBean
+    private DogsFotoService fotoServicesDogs;
 
     @SpyBean
     private ReportUsersService reportUsersService;
@@ -196,7 +210,6 @@ public class DogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string
                         ("{\"id\":1,\"nickname\":\"Sharik\",\"age\":1,\"infoDog\":\"Info Dog\"}"));
-
     }
 
     @Test

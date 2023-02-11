@@ -39,6 +39,9 @@ public class CatControllerTest {
     private CatsRepository repository;
 
     @MockBean
+    private ShelterRepository shelterRepository;
+
+    @MockBean
     private UsersRepository repositoryUsers;
 
     @MockBean
@@ -59,6 +62,8 @@ public class CatControllerTest {
     @MockBean
     private BinaryContentFileRepository binaryContentFileRepository;
 
+    @SpyBean
+    private ShelterService shelterService;
     @SpyBean
     private CatsService service;
 
